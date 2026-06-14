@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import AudioManager from '../systems/AudioManager.js';
 import SaveSystem from '../systems/SaveSystem.js';
+import { addBackButton } from '../ui/kit.js';
 
 export default class WardrobeScene extends Phaser.Scene {
   constructor() {
@@ -74,6 +75,8 @@ export default class WardrobeScene extends Phaser.Scene {
 
     this.add.text(width / 2, height - 45, 'Tap an outfit to equip', {
       fontSize: '18px', color: '#4A148C' }).setOrigin(0.5);
+
+    addBackButton(this);
   }
 
   getOutfitName(id) { /* ... */ }

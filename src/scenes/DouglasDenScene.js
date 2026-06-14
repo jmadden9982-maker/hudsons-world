@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import AudioManager from '../systems/AudioManager.js';
+import { addBackButton } from '../ui/kit.js';
 
 export default class DouglasDenScene extends Phaser.Scene {
   constructor() {
@@ -50,5 +51,7 @@ export default class DouglasDenScene extends Phaser.Scene {
       fontSize: '18px',
       color: '#3b2b20'
     }).setOrigin(0.5);
+
+    addBackButton(this);
   }
 }

@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import AudioManager from '../systems/AudioManager.js';
 import SaveSystem from '../systems/SaveSystem.js';
+import { addBackButton } from '../ui/kit.js';
 
 export default class DouglasDashScene extends Phaser.Scene {
   constructor() {
@@ -39,6 +40,9 @@ export default class DouglasDashScene extends Phaser.Scene {
     this.physics.add.overlap(this.doug, this.obstacles, this.hitObstacle, null, this);
 
     this.physics.world.gravity.y = 1100;
+
+    // Escape hatch back to the map (sits above the playfield, clear of score text)
+    addBackButton(this);
   }
 
   jump() {
