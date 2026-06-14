@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import AudioManager from '../systems/AudioManager.js';
 import SaveSystem from '../systems/SaveSystem.js';
-import { addBackButton } from '../ui/kit.js';
+import { addBackButton, sceneBg, makeDouglasSprite } from '../ui/kit.js';
 
 export default class DouglasDashScene extends Phaser.Scene {
   constructor() {
@@ -16,14 +16,25 @@ export default class DouglasDashScene extends Phaser.Scene {
     this.score = 0;
     this.isGameOver = false;
 
-    this.add.rectangle(0, 0, W, H, 0x87CEEB).setOrigin(0);
+    // Painted sky background if committed, else the original flat colour.
+    if (this.textures.exists('bg_dash')) sceneBg(this, 'bg_dash', 0x87CEEB, 0xBFE9FF);
+    else this.add.rectangle(0, 0, W, H, 0x87CEEB).setOrigin(0);
+
     this.ground = this.add.rectangle(0, H - 60, W, 60, 0x228B22).setOrigin(0);
     this.physics.add.existing(this.ground, true);
 
+    // Physics body stays a reliable rectangle; if the sheet loaded we hide it and
+    // sync a visible Douglas sprite to it each frame (see update()).
     this.doug = this.add.rectangle(140, H - 130, 48, 60, 0x8B4513);
     this.physics.add.existing(this.doug);
     this.doug.body.setCollideWorldBounds(true);
     this.physics.add.collider(this.doug, this.ground);
+
+    this.dougSprite = makeDouglasSprite(this, this.doug.x, this.doug.y, 'douglas_run');
+    if (this.dougSprite) {
+      this.dougSprite.setScale(0.30);
+      this.doug.setVisible(false);
+    }
 
     this.scoreText = this.add.text(30, 30, 'Score: 0', { fontSize: '28px', color: '#ffffff', fontStyle: 'bold' });
     this.highScoreText = this.add.text(30, 70, 'Best: ' + SaveSystem.getHighScore(), { fontSize: '20px', color: '#FFD23F' });
@@ -94,6 +105,8 @@ export default class DouglasDashScene extends Phaser.Scene {
   }
 
   update() {
+    // Keep the visible sprite locked onto the physics body.
+    if (this.dougSprite) { this.dougSprite.x = this.doug.x; this.dougSprite.y = this.doug.y; }
     if (this.isGameOver) return;
     this.obstacles.children.iterate(ob => { if (ob && ob.x < -50) ob.destroy(); });
     this.collectibles.children.iterate(item => { if (item && item.x < -30) item.destroy(); });

@@ -141,3 +141,38 @@ export function addBackButton(scene, targetScene = 'WorldMapScene') {
 }
 export function addBottomDock(scene, activeKey = '') { return makeDock(scene, activeKey); }
 export function addPremiumHud(scene) { return makeHUD(scene); }
+
+// ---- Douglas sprite support (optional) -------------------------------------
+// All guarded: if the 'douglas_sheet' texture never loaded (no art committed),
+// these no-op so callers keep their rectangle fallback. Never throws.
+export function ensureDouglasAnims(scene) {
+  try {
+    if (!scene.textures.exists('douglas_sheet')) return false;
+    if (!scene.anims.exists('douglas_idle')) {
+      scene.anims.create({
+        key: 'douglas_idle',
+        frames: scene.anims.generateFrameNumbers('douglas_sheet', { start: 0, end: 2 }),
+        frameRate: 4, repeat: -1, yoyo: true
+      });
+    }
+    if (!scene.anims.exists('douglas_run')) {
+      scene.anims.create({
+        key: 'douglas_run',
+        frames: scene.anims.generateFrameNumbers('douglas_sheet', { start: 0, end: 2 }),
+        frameRate: 10, repeat: -1
+      });
+    }
+    return true;
+  } catch (e) { return false; }
+}
+
+// Returns a playing Douglas sprite if the sheet loaded, else null so the caller
+// can fall back to its existing placeholder rectangle.
+export function makeDouglasSprite(scene, x, y, anim = 'douglas_idle') {
+  try {
+    if (!ensureDouglasAnims(scene)) return null;
+    const spr = scene.add.sprite(x, y, 'douglas_sheet', 0);
+    if (scene.anims.exists(anim)) spr.play(anim);
+    return spr;
+  } catch (e) { return null; }
+}

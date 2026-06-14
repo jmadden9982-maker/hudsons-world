@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import AudioManager from '../systems/AudioManager.js';
-import { addBackButton } from '../ui/kit.js';
+import { addBackButton, sceneBg, makeDouglasSprite } from '../ui/kit.js';
 
 export default class DouglasDenScene extends Phaser.Scene {
   constructor() {
@@ -12,7 +12,9 @@ export default class DouglasDenScene extends Phaser.Scene {
 
     const { width, height } = this.scale;
 
-    this.add.rectangle(0, 0, width, height, 0xF5DEB3).setOrigin(0);
+    // Painted background if committed, else the original flat fallback colour.
+    if (this.textures.exists('bg_den')) sceneBg(this, 'bg_den', 0xF5DEB3, 0xE8C99A);
+    else this.add.rectangle(0, 0, width, height, 0xF5DEB3).setOrigin(0);
 
     this.add.text(width / 2, 55, 'Douglas Den', {
       fontSize: '36px',
@@ -20,7 +22,15 @@ export default class DouglasDenScene extends Phaser.Scene {
       fontStyle: 'bold'
     }).setOrigin(0.5);
 
-    const douglas = this.add.rectangle(width / 2, height / 2 - 30, 110, 90, 0x8B4513).setInteractive({ useHandCursor: true });
+    // Real Douglas sprite if the sheet loaded, otherwise keep the brown rectangle.
+    let douglas = makeDouglasSprite(this, width / 2, height / 2 - 30, 'douglas_idle');
+    if (douglas) douglas.setScale(0.62);
+    else douglas = this.add.rectangle(width / 2, height / 2 - 30, 110, 90, 0x8B4513);
+    douglas.setInteractive({ useHandCursor: true });
+
+    // Gentle idle bob (works for sprite or rectangle).
+    this.tweens.add({ targets: douglas, y: douglas.y - 10, duration: 900, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+
     this.add.text(width / 2, height / 2 + 50, 'Douglas', { fontSize: '24px', color: '#3b2b20' }).setOrigin(0.5);
 
     douglas.on('pointerdown', () => {

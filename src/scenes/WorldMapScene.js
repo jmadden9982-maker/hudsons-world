@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import AudioManager from '../systems/AudioManager.js';
+import { sceneBg } from '../ui/kit.js';
 
 export default class WorldMapScene extends Phaser.Scene {
   constructor() {
@@ -11,8 +12,12 @@ export default class WorldMapScene extends Phaser.Scene {
 
     const { width, height } = this.scale;
 
-    this.add.rectangle(0, 0, width, height, 0x87CEEB).setOrigin(0);
-    this.add.rectangle(0, height * 0.7, width, height * 0.3, 0x228B22).setOrigin(0);
+    if (this.textures.exists('bg_worldmap')) {
+      sceneBg(this, 'bg_worldmap', 0x87CEEB, 0xBFE9FF);
+    } else {
+      this.add.rectangle(0, 0, width, height, 0x87CEEB).setOrigin(0);
+      this.add.rectangle(0, height * 0.7, width, height * 0.3, 0x228B22).setOrigin(0);
+    }
 
     this.add.text(width / 2, 55, 'Adventure Map', { fontSize: '36px', color: '#ffffff', fontStyle: 'bold' }).setOrigin(0.5);
 

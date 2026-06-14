@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import AudioManager from '../systems/AudioManager.js';
 import SaveSystem from '../systems/SaveSystem.js';
-import { addBackButton } from '../ui/kit.js';
+import { addBackButton, sceneBg } from '../ui/kit.js';
 
 export default class WardrobeScene extends Phaser.Scene {
   constructor() {
@@ -13,7 +13,8 @@ export default class WardrobeScene extends Phaser.Scene {
 
     const { width, height } = this.scale;
 
-    this.add.rectangle(0, 0, width, height, 0xEADFFB).setOrigin(0);
+    if (this.textures.exists('bg_wardrobe')) sceneBg(this, 'bg_wardrobe', 0xEADFFB, 0xD7C3F5);
+    else this.add.rectangle(0, 0, width, height, 0xEADFFB).setOrigin(0);
 
     this.add.text(width / 2, 50, 'Wardrobe', {
       fontSize: '36px',

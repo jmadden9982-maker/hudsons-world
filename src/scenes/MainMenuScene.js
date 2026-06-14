@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import AudioManager from '../systems/AudioManager.js';
+import { sceneBg } from '../ui/kit.js';
 
 export default class MainMenuScene extends Phaser.Scene {
   constructor() {
@@ -11,8 +12,12 @@ export default class MainMenuScene extends Phaser.Scene {
 
     const { width, height } = this.scale;
 
-    this.add.rectangle(0, 0, width, height, 0x87CEEB).setOrigin(0);
-    this.add.rectangle(0, height * 0.65, width, height * 0.35, 0x228B22).setOrigin(0);
+    if (this.textures.exists('bg_mainmenu')) {
+      sceneBg(this, 'bg_mainmenu', 0x87CEEB, 0xBFE9FF);
+    } else {
+      this.add.rectangle(0, 0, width, height, 0x87CEEB).setOrigin(0);
+      this.add.rectangle(0, height * 0.65, width, height * 0.35, 0x228B22).setOrigin(0);
+    }
 
     this.add.text(width / 2, 160, "HUDSON'S WORLD", { fontSize: '52px', color: '#FFD23F', fontStyle: 'bold' }).setOrigin(0.5);
     this.add.text(width / 2, 215, 'A Premium Adventure', { fontSize: '22px', color: '#ffffff' }).setOrigin(0.5);

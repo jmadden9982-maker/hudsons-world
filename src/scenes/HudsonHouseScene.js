@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { FONT, addPremiumHud, addBottomDock } from '../ui/kit.js';
+import { FONT, addPremiumHud, addBottomDock, makeDouglasSprite } from '../ui/kit.js';
 import { S } from '../systems/state.js';
 import { feel } from '../systems/feel.js';
 
@@ -96,9 +96,17 @@ export default class HudsonHouseScene extends Phaser.Scene {
       });
     });
 
-    // Douglas (fixed - no wrong exit to Main Menu)
-    const douglas = this.add.rectangle(W - 120, H - 120, 80, 60, 0x8B4513).setInteractive({ useHandCursor: true });
-    this.add.text(W - 120, H - 120, '🐕 Douglas', { fontSize: '16px', color: '#fff' }).setOrigin(0.5);
+    // Douglas (real sprite if loaded, else the small placeholder). Kept above the
+    // bottom dock (dock occupies the lower 64px) and tappable to visit his den.
+    let douglas = makeDouglasSprite(this, W - 110, H - 150, 'douglas_idle');
+    if (douglas) {
+      douglas.setScale(0.38);
+      this.tweens.add({ targets: douglas, y: douglas.y - 8, duration: 1000, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+    } else {
+      douglas = this.add.rectangle(W - 120, H - 120, 80, 60, 0x8B4513);
+      this.add.text(W - 120, H - 120, '🐕 Douglas', { fontSize: '16px', color: '#fff' }).setOrigin(0.5);
+    }
+    douglas.setInteractive({ useHandCursor: true });
     douglas.on('pointerdown', () => {
       feel(this, 'douglas_happy', 'soft');
       this.add.text(W - 120, H - 160, 'Douglas is happy!', { fontSize: '16px', color: '#FFD23F' }).setOrigin(0.5);
