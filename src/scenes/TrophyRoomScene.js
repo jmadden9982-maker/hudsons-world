@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import SaveSystem from '../systems/SaveSystem.js';
 
 export default class TrophyRoomScene extends Phaser.Scene {
   constructor() {
@@ -16,8 +17,7 @@ export default class TrophyRoomScene extends Phaser.Scene {
       fontStyle: 'bold'
     }).setOrigin(0.5);
 
-    // Golden Douglas Statue
-    const found = localStorage.getItem('goldenDouglasFound') === 'true';
+    const found = SaveSystem.getGoldenDouglasFound();
 
     const statueColor = found ? 0xFFD700 : 0x757575;
     const statue = this.add.rectangle(width / 2, 220, 130, 150, statueColor).setInteractive({ useHandCursor: true });
@@ -30,29 +30,17 @@ export default class TrophyRoomScene extends Phaser.Scene {
 
     statue.on('pointerdown', () => {
       if (found) {
-        // Replay the moment
         if (window.startGoldenDouglasSequence) {
           window.startGoldenDouglasSequence(this);
-        } else {
-          this.scene.start('WorldMapScene');
         }
       } else {
-        // First discovery!
-        localStorage.setItem('goldenDouglasFound', 'true');
-
+        SaveSystem.setGoldenDouglasFound();
         if (window.startGoldenDouglasSequence) {
           window.startGoldenDouglasSequence(this);
-        } else {
-          this.add.text(width / 2, 380, 'You found Golden Douglas!', {
-            fontSize: '22px',
-            color: '#FFD700'
-          }).setOrigin(0.5);
-          this.time.delayedCall(1500, () => this.scene.start('WorldMapScene'));
         }
       }
     });
 
-    // Other achievements
     const achievements = [
       { name: 'First Jump', color: 0xCD7F32 },
       { name: 'Score 100', color: 0xC0C0C0 },
@@ -70,7 +58,7 @@ export default class TrophyRoomScene extends Phaser.Scene {
       }).setOrigin(0.5);
     });
 
-    this.add.text(width / 2, height - 50, found ? 'Tap Golden Douglas to replay!' : 'Find the secret...', {
+    this.add.text(width / 2, height - 50, found ? 'Tap to replay Golden Douglas!' : 'Find the secret...', {
       fontSize: '18px',
       color: '#FFD700'
     }).setOrigin(0.5);

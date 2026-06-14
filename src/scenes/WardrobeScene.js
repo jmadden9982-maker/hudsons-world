@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import SaveSystem from '../systems/SaveSystem.js';
 
 export default class WardrobeScene extends Phaser.Scene {
   constructor() {
@@ -16,20 +17,18 @@ export default class WardrobeScene extends Phaser.Scene {
       fontStyle: 'bold'
     }).setOrigin(0.5);
 
-    // Current outfit (from localStorage or default)
-    this.currentOutfit = localStorage.getItem('currentOutfit') || 'everyday';
+    this.currentOutfit = SaveSystem.getCurrentOutfit();
 
-    // === HUDSON PREVIEW (Center) ===
+    // Preview
     this.preview = this.add.rectangle(width / 2, 280, 140, 180, 0xFFCC80);
     this.add.text(width / 2, 280, '👦', { fontSize: '80px' }).setOrigin(0.5);
 
-    this.outfitLabel = this.add.text(width / 2, 400, 'Everyday Hudson', {
+    this.outfitLabel = this.add.text(width / 2, 400, this.getOutfitName(this.currentOutfit), {
       fontSize: '22px',
       color: '#4A148C',
       fontStyle: 'bold'
     }).setOrigin(0.5);
 
-    // === OUTFIT CARDS ===
     const outfits = [
       { id: 'everyday', name: 'Everyday', emoji: '👕', unlocked: true, color: 0x81D4FA },
       { id: 'super', name: 'Super Hudson', emoji: '🦸', unlocked: true, color: 0xFF5252 },
@@ -75,11 +74,21 @@ export default class WardrobeScene extends Phaser.Scene {
     }).setOrigin(0.5);
   }
 
+  getOutfitName(id) {
+    const map = {
+      'everyday': 'Everyday Hudson',
+      'super': 'Super Hudson',
+      'pirate': 'Pirate Hudson',
+      'dino': 'Dino Explorer',
+      'space': 'Space Hudson',
+      'golden': 'Golden Explorer'
+    };
+    return map[id] || 'Everyday Hudson';
+  }
+
   equipOutfit(outfit, card) {
-    // Update preview label
     this.outfitLabel.setText(outfit.name);
 
-    // Glow effect on selected card
     this.tweens.add({
       targets: card,
       scaleX: 1.1,
@@ -88,17 +97,14 @@ export default class WardrobeScene extends Phaser.Scene {
       yoyo: true
     });
 
-    // Sparkles
     this.add.particles(card.x, card.y, 'particle_sparkle', {
       speed: { min: 40, max: 90 },
       scale: { start: 0.4, end: 0 },
       lifespan: 500
     }).explode(8);
 
-    // Save outfit
-    localStorage.setItem('currentOutfit', outfit.id);
+    SaveSystem.setCurrentOutfit(outfit.id);
 
-    // Brief confirmation
     this.time.delayedCall(800, () => {
       this.scene.start('WorldMapScene');
     });
