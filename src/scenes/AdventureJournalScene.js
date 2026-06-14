@@ -1,44 +1,38 @@
 import Phaser from 'phaser';
-import AudioManager from '../systems/AudioManager.js';
-import SaveSystem from '../systems/SaveSystem.js';
+import { FONT, makeHUD, makeDock, sceneBg, addBackButton } from '../ui/kit.js';
+import { S } from '../systems/state.js';
+import { SFX } from '../systems/audio.js';
+import { feel } from '../systems/feel.js';
 
 export default class AdventureJournalScene extends Phaser.Scene {
-  constructor() {
-    super('AdventureJournalScene');
-  }
+  constructor() { super('AdventureJournalScene'); }
 
   create() {
-    AudioManager.setScene(this);
+    const { width:W, height:H } = this.scale;
 
-    const { width, height } = this.scale;
+    sceneBg(this, 'bg_journal', 0xFBEAD0, 0xE6CBA6);
+    this.add.text(W/2, 56, '📖 The Adventures of Hudson', { fontFamily: FONT, fontSize: '26px', color: '#7a4a00', fontStyle: 'bold' }).setOrigin(0.5);
 
-    this.add.rectangle(0, 0, width, height, 0xFBEAD0).setOrigin(0);
+    const entries = S.journal.slice(0, 40);
+    if (!entries.length) {
+      this.add.text(W/2, H/2, 'Your storybook is empty.\nPlay an adventure to write your first page!', { fontFamily: FONT, fontSize: '18px', color: '#7a5a28', fontStyle: 'bold', align: 'center' }).setOrigin(0.5);
+    }
 
-    this.add.text(width / 2, 45, '📖 The Adventures of Hudson', {
-      fontSize: '28px', color: '#3b2b20', fontStyle: 'bold' }).setOrigin(0.5);
-
-    const entries = [ /* existing entries */ ];
-    const favourites = SaveSystem.getJournalFavourites();
-
-    entries.forEach((entry, i) => {
-      const y = 140 + i * 160;
-      this.add.rectangle(width / 2, y, 620, 130, 0xFFFFFF).setOrigin(0.5);
-      this.add.text(140, y, entry.icon, { fontSize: '48px' }).setOrigin(0.5);
-      this.add.text(280, y - 35, entry.title, { fontSize: '22px', color: '#3b2b20', fontStyle: 'bold' }).setOrigin(0, 0.5);
-      this.add.text(280, y + 5, entry.text, { fontSize: '16px', color: '#5a4632', wordWrap: { width: 340 } }).setOrigin(0, 0.5);
-      this.add.text(580, y + 45, entry.date, { fontSize: '14px', color: '#8d6e63' }).setOrigin(1, 0.5);
-
-      const isFav = favourites.includes(entry.id);
-      const fav = this.add.text(580, y - 35, isFav ? '★' : '☆', { fontSize: '28px', color: '#FFD23F' }).setOrigin(1, 0.5).setInteractive({ useHandCursor: true });
-
-      fav.on('pointerdown', () => {
-        AudioManager.playSfx('button_confirm');
-        const newFavs = SaveSystem.toggleJournalFavourite(entry.id);
-        fav.setText(newFavs.includes(entry.id) ? '★' : '☆');
-      });
+    const view = this.add.container(0, 0);
+    let y = 92;
+    entries.forEach(e => {
+      const card = this.add.container(W/2, y);
+      const gold = /GOLDEN|Kingdom/i.test(e.title);
+      const p = this.add.graphics();
+      p.fillStyle(0xFFFDF6, 1); p.fillRoundedRect(-W*0.42, -2, W*0.84, 72, 12);
+      p.fillStyle(gold ? 0xFFD23F : 0x9B6DD7, 1); p.fillRoundedRect(-W*0.42, -2, 8, 72, 4);
+      card.add([p, this.add.text(-W*0.40+18, 8, e.ic + '  ' + e.title, { fontFamily: FONT, fontSize: '16px', color: '#3b2b20', fontStyle: 'bold', wordWrap:{width:W*0.74} }),
+        this.add.text(-W*0.40+18, 34, e.text, { fontFamily: FONT, fontSize: '13px', color: '#5a4632', wordWrap:{width:W*0.76} })]);
+      view.add(card);
+      y += 84;
     });
 
-    this.add.text(width / 2, height - 50, 'Your story is just beginning...', {
-      fontSize: '18px', color: '#5a4632' }).setOrigin(0.5);
+    makeHUD(this); makeDock(this, 'AdventureJournalScene');
+    addBackButton(this);
   }
 }
