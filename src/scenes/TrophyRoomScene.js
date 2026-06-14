@@ -16,42 +16,63 @@ export default class TrophyRoomScene extends Phaser.Scene {
       fontStyle: 'bold'
     }).setOrigin(0.5);
 
-    // Golden Douglas Statue (center)
-    const statue = this.add.rectangle(width / 2, 220, 120, 140, 0xFFD700).setInteractive({ useHandCursor: true });
-    this.add.text(width / 2, 220, '🐕✨', { fontSize: '48px' }).setOrigin(0.5);
-    this.add.text(width / 2, 300, 'Golden Douglas', {
+    // Golden Douglas Statue
+    const found = localStorage.getItem('goldenDouglasFound') === 'true';
+
+    const statueColor = found ? 0xFFD700 : 0x757575;
+    const statue = this.add.rectangle(width / 2, 220, 130, 150, statueColor).setInteractive({ useHandCursor: true });
+
+    this.add.text(width / 2, 220, found ? '🐕✨' : '🔒', { fontSize: '52px' }).setOrigin(0.5);
+    this.add.text(width / 2, 310, found ? 'Golden Douglas' : 'Golden Douglas (Locked)', {
       fontSize: '18px',
-      color: '#FFD700'
+      color: found ? '#FFD700' : '#aaaaaa'
     }).setOrigin(0.5);
 
     statue.on('pointerdown', () => {
-      this.add.text(width / 2, 360, 'Legendary!', { fontSize: '20px', color: '#FFD700' }).setOrigin(0.5);
-      this.time.delayedCall(900, () => this.scene.start('WorldMapScene'));
+      if (found) {
+        // Replay the moment
+        if (window.startGoldenDouglasSequence) {
+          window.startGoldenDouglasSequence(this);
+        } else {
+          this.scene.start('WorldMapScene');
+        }
+      } else {
+        // First discovery!
+        localStorage.setItem('goldenDouglasFound', 'true');
+
+        if (window.startGoldenDouglasSequence) {
+          window.startGoldenDouglasSequence(this);
+        } else {
+          this.add.text(width / 2, 380, 'You found Golden Douglas!', {
+            fontSize: '22px',
+            color: '#FFD700'
+          }).setOrigin(0.5);
+          this.time.delayedCall(1500, () => this.scene.start('WorldMapScene'));
+        }
+      }
     });
 
-    // Achievement list
+    // Other achievements
     const achievements = [
-      { name: 'First Jump', frame: 0xCD7F32 },
-      { name: 'First Bone', frame: 0xCD7F32 },
-      { name: 'Score 100', frame: 0xC0C0C0 },
-      { name: 'Score 500', frame: 0xFFD700 },
-      { name: 'Pet Douglas 10x', frame: 0xC0C0C0 },
-      { name: 'House Explorer', frame: 0xCD7F32 }
+      { name: 'First Jump', color: 0xCD7F32 },
+      { name: 'Score 100', color: 0xC0C0C0 },
+      { name: 'Score 500', color: 0xFFD700 },
+      { name: 'Baby Bell Finder', color: 0xCD7F32 }
     ];
 
     achievements.forEach((ach, i) => {
-      const y = 420 + i * 70;
-      const card = this.add.rectangle(width / 2, y, 420, 55, ach.frame).setInteractive({ useHandCursor: true });
+      const y = 420 + i * 65;
+      this.add.rectangle(width / 2, y, 380, 50, ach.color);
       this.add.text(width / 2, y, ach.name, {
-        fontSize: '22px',
+        fontSize: '20px',
         color: '#3b2b20',
         fontStyle: 'bold'
       }).setOrigin(0.5);
-
-      card.on('pointerdown', () => {
-        this.add.text(width / 2, y + 35, 'Unlocked!', { fontSize: '16px', color: '#FFD700' }).setOrigin(0.5);
-        this.time.delayedCall(700, () => this.scene.start('WorldMapScene'));
-      });
     });
+
+    this.add.text(width / 2, height - 50, found ? 'Tap Golden Douglas to replay!' : 'Find the secret...', {
+      fontSize: '18px',
+      color: '#FFD700'
+    }).setOrigin(0.5);
   }
 }
