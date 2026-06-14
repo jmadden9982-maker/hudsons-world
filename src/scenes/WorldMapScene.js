@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import AudioManager from '../systems/AudioManager.js';
 
 export default class WorldMapScene extends Phaser.Scene {
   constructor() {
@@ -6,6 +7,8 @@ export default class WorldMapScene extends Phaser.Scene {
   }
 
   create() {
+    AudioManager.setScene(this);
+
     const { width, height } = this.scale;
 
     this.add.rectangle(0, 0, width, height, 0x87CEEB).setOrigin(0);
@@ -28,6 +31,7 @@ export default class WorldMapScene extends Phaser.Scene {
       this.add.text(zone.x, zone.y - 15, zone.emoji + ' ' + zone.name, { fontSize: '20px', color: '#ffffff', fontStyle: 'bold' }).setOrigin(0.5);
 
       card.on('pointerdown', () => {
+        AudioManager.playSfx('button_click');
         this.tweens.add({ targets: card, scaleX: 0.92, scaleY: 0.92, duration: 80, yoyo: true });
         this.scene.start(zone.scene);
       });
