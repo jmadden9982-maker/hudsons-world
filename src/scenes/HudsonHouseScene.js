@@ -18,61 +18,65 @@ export default class HudsonHouseScene extends Phaser.Scene {
       fontStyle: 'bold'
     }).setOrigin(0.5);
 
-    // Daily Reward Chest
-    const chest = this.add.rectangle(width / 2, 260, 150, 110, 0x8B4513).setInteractive({ useHandCursor: true });
-    this.add.text(width / 2, 260, '🎁 Daily Chest', {
+    // === DAILY REWARD CHEST ===
+    this.chest = this.add.rectangle(width / 2, 260, 150, 110, 0x8B4513).setInteractive({ useHandCursor: true });
+    this.chestLabel = this.add.text(width / 2, 260, '🎁 Daily Chest', {
       fontSize: '20px',
       color: '#FFD700',
       fontStyle: 'bold'
     }).setOrigin(0.5);
 
-    this.tweens.add({
-      targets: chest,
-      scaleX: 1.04,
-      scaleY: 1.04,
-      duration: 1100,
-      yoyo: true,
-      repeat: -1
-    });
+    // Idle wiggle + glow pulse
+    this.startChestIdleAnimation();
 
-    chest.on('pointerdown', () => this.openDailyChest());
+    this.chest.on('pointerdown', () => this.openDailyChest());
 
-    // Baby Bell spots
-    const spots = [
-      { x: 160, y: 380, label: '🧸 Toy Box' },
-      { x: width / 2, y: 480, label: '🛏️ Under Bed' },
-      { x: width - 160, y: 380, label: '🪟 Window Sill' }
-    ];
+    // Other interactive objects (kept simple)
+    const toyBox = this.add.rectangle(160, 420, 120, 70, 0x4169E1).setInteractive({ useHandCursor: true });
+    this.add.text(160, 420, '🧸 Toys', { fontSize: '18px', color: '#fff' }).setOrigin(0.5);
+    toyBox.on('pointerdown', () => this.scene.start('WorldMapScene'));
 
-    const hiddenSpot = Phaser.Math.RND.pick(spots);
+    const bed = this.add.rectangle(width / 2, 520, 200, 70, 0xFF69B4).setInteractive({ useHandCursor: true });
+    this.add.text(width / 2, 520, '🛏️ Bed', { fontSize: '18px', color: '#fff' }).setOrigin(0.5);
+    bed.on('pointerdown', () => this.scene.start('WorldMapScene'));
 
-    spots.forEach(spot => {
-      const obj = this.add.rectangle(spot.x, spot.y, 110, 65, 0x696969).setInteractive({ useHandCursor: true });
-      this.add.text(spot.x, spot.y, spot.label, { fontSize: '16px', color: '#fff' }).setOrigin(0.5);
-
-      obj.on('pointerdown', () => {
-        if (spot.x === hiddenSpot.x) {
-          SaveSystem.incrementBabyBellCount();
-          this.add.text(spot.x, spot.y - 50, '🐱 MEOW!', { fontSize: '24px', color: '#FFD23F' }).setOrigin(0.5);
-          this.time.delayedCall(800, () => this.scene.start('WorldMapScene'));
-        } else {
-          this.add.text(spot.x, spot.y - 40, 'Not here...', { fontSize: '16px', color: '#aaa' }).setOrigin(0.5);
-          this.time.delayedCall(600, () => this.scene.start('WorldMapScene'));
-        }
-      });
-    });
-
-    // Douglas
     const douglas = this.add.rectangle(width - 140, 520, 70, 55, 0x8B4513).setInteractive({ useHandCursor: true });
     this.add.text(width - 140, 520, '🐕 Douglas', { fontSize: '16px', color: '#fff' }).setOrigin(0.5);
-
     douglas.on('pointerdown', () => this.scene.start('WorldMapScene'));
 
-    this.add.text(width / 2, height - 45, 'Find Baby Bell! 🐱', {
+    this.add.text(width / 2, height - 45, 'Open the Daily Chest!', {
       fontSize: '20px',
       color: '#3b2b20',
       fontStyle: 'bold'
     }).setOrigin(0.5);
+  }
+
+  startChestIdleAnimation() {
+    // Gentle wiggle
+    this.tweens.add({
+      targets: this.chest,
+      scaleX: 1.03,
+      scaleY: 1.03,
+      duration: 1400,
+      yoyo: true,
+      repeat: -1,
+      ease: 'Sine.inOut'
+    });
+
+    // Occasional sparkle
+    this.time.addEvent({
+      delay: 4500,
+      callback: () => {
+        if (this.chest && this.chest.active) {
+          this.add.particles(this.chest.x, this.chest.y - 30, 'particle_sparkle', {
+            speed: { min: 20, max: 50 },
+            scale: { start: 0.3, end: 0 },
+            lifespan: 600
+          }).explode(4);
+        }
+      },
+      loop: true
+    });
   }
 
   openDailyChest() {
@@ -87,15 +91,40 @@ export default class HudsonHouseScene extends Phaser.Scene {
     SaveSystem.setLastDailyReward(today);
     SaveSystem.addStars(25);
 
-    // Simple claim popup
-    const popup = this.add.text(this.scale.width / 2, this.scale.height / 2, '🎁 +25 Stars!', {
-      fontSize: '28px',
-      color: '#FFD700'
-    }).setOrigin(0.5);
+    // Opening animation
+    this.tweens.add({
+      targets: this.chest,
+      scaleX: 0.85,
+      scaleY: 1.15,
+      duration: 120,
+      yoyo: true,
+      onComplete: () => {
+        // Golden flash + reward popup
+        this.add.particles(this.chest.x, this.chest.y, 'particle_sparkle', {
+          speed: { min: 60, max: 140 },
+          scale: { start: 0.6, end: 0 },
+          lifespan: 700
+        }).explode(14);
 
-    this.time.delayedCall(1200, () => {
-      popup.destroy();
-      this.scene.start('WorldMapScene');
+        const popup = this.add.text(this.scale.width / 2, this.scale.height / 2 - 40, '🎁 +25 Stars!', {
+          fontSize: '32px',
+          color: '#FFD700',
+          fontStyle: 'bold'
+        }).setOrigin(0.5);
+
+        this.tweens.add({
+          targets: popup,
+          y: this.scale.height / 2 - 120,
+          scale: 1.1,
+          duration: 600,
+          ease: 'Back.easeOut'
+        });
+
+        this.time.delayedCall(1400, () => {
+          popup.destroy();
+          this.scene.start('WorldMapScene');
+        });
+      }
     });
   }
 }
