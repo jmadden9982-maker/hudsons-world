@@ -1,0 +1,10 @@
+const config = {
+  appId: 'com.hudsonsworld.game',
+  appName: "Hudson's World",
+  webDir: 'dist',
+  server: {
+    androidScheme: 'https'
+  }
+};
+
+module.exports = config;
