@@ -1,27 +1,20 @@
 import Phaser from 'phaser';
-import AudioManager from '../systems/AudioManager.js';
-import { S } from '../systems/state.js';
+import { FONT, sceneBg } from '../ui/kit.js';
+import { feel } from '../systems/feel.js';
 
 export default class TrophyRoomScene extends Phaser.Scene {
-  constructor() {
-    super('TrophyRoomScene');
-  }
+  constructor() { super('TrophyRoomScene'); }
 
   create() {
-    AudioManager.setScene(this);
+    const { width:W, height:H } = this.scale;
 
-    const { width: W, height: H } = this.scale;
-
-    const hasArt = this.textures.exists('bg_trophies');
-    if (hasArt) {
-      const bg = this.add.image(W / 2, H / 2, 'bg_trophies');
-      const sc = Math.max(W / bg.width, H / bg.height);
-      bg.setScale(sc);
+    if (this.textures.exists('bg_trophies')) {
+      sceneBg(this, 'bg_trophies', 0x6E4422, 0xB07B4F);
     } else {
       this.add.rectangle(0, 0, W, H, 0x3E2723).setOrigin(0);
     }
 
-    this.add.text(W / 2, 50, '🏆 Trophy Room', {
+    this.add.text(W/2, 50, '🏆 Trophy Room', {
       fontFamily: FONT,
       fontSize: '28px',
       color: '#FFE9C9',
@@ -29,69 +22,41 @@ export default class TrophyRoomScene extends Phaser.Scene {
     }).setOrigin(0.5);
 
     const rows = [
-      ['🏃 Douglas Dash best', S.best.dash + 'm'],
-      ['🎃 Pumpkin Smash best', S.best.pumpkin + ' pts'],
-      ['🚀 Space Rescue best', S.best.space + ' pts'],
-      ['🏆 Critter Cards', S.cards.length + ' found'],
-      ['⭐ Level', S.level + ' / 10'],
-      ['🪙 Coins earned (all time)', S.lifetime]
+      ['🏃 Douglas Dash best', '—'],
+      ['🎃 Pumpkin Smash best', '—'],
+      ['🚀 Space Rescue best', '—'],
+      ['🏆 Critter Cards', '—'],
+      ['⭐ Level', '—'],
+      ['🪙 Coins earned (all time)', '—']
     ];
 
     rows.forEach((r, i) => {
       const y = 130 + i * 42;
-      this.add.text(W / 2 - 200, y, r[0], {
-        fontFamily: FONT,
-        fontSize: '17px',
-        color: '#3b2b20',
-        fontStyle: 'bold'
-      });
-      this.add.text(W / 2 + 200, y, '' + r[1], {
-        fontFamily: FONT,
-        fontSize: '17px',
-        color: '#c98a00',
-        fontStyle: 'bold'
-      }).setOrigin(1, 0);
+      this.add.text(W/2 - 200, y, r[0], { fontFamily: FONT, fontSize: '17px', color: '#3b2b20', fontStyle: 'bold' });
+      this.add.text(W/2 + 200, y, r[1], { fontFamily: FONT, fontSize: '17px', color: '#c98a00', fontStyle: 'bold' }).setOrigin(1, 0);
     });
 
-    if (S.kingdom) {
-      // === SAFE OPTIONAL: Use gold trophy frame if available ===
-      if (this.textures.exists('ui_trophy_gold')) {
-        const frame = this.add.image(W / 2, 370, 'ui_trophy_gold').setOrigin(0.5);
-        frame.setDisplaySize(220, 260);
-        frame.setInteractive({ useHandCursor: true });
-        frame.on('pointerdown', () => {
-          feel(this, 'golden_douglas', 'achievement');
-          if (typeof RewardJuice !== 'undefined') {
-            RewardJuice.confetti(this, W / 2, 370);
-          }
-        });
-      } else {
-        // Fallback text
-        const statue = this.add.text(W / 2, 370, '🐕✨ GOLDEN DOUGLAS STATUE ✨🐕', {
-          fontFamily: FONT,
-          fontSize: '20px',
-          color: '#FFD23F',
-          fontStyle: 'bold'
-        }).setOrigin(0.5).setInteractive({ useHandCursor: true });
-        statue.on('pointerdown', () => {
-          feel(this, 'golden_douglas', 'achievement');
-          if (typeof RewardJuice !== 'undefined') {
-            RewardJuice.confetti(this, W / 2, 370);
-          }
-        });
-      }
+    // Golden Douglas Statue (proof of optional trophy frame)
+    if (this.textures.exists('ui_trophy_gold')) {
+      const frame = this.add.image(W/2, 370, 'ui_trophy_gold').setOrigin(0.5);
+      frame.setDisplaySize(220, 260);
+      frame.setInteractive({ useHandCursor: true });
+      frame.on('pointerdown', () => {
+        feel(this, 'golden_douglas', 'achievement');
+      });
     } else {
-      const locked = this.add.text(W / 2, 370, '🔒 Golden Douglas Statue — Reach Kingdom', {
+      const statue = this.add.text(W/2, 370, '🐕✨ GOLDEN DOUGLAS STATUE ✨🐕', {
         fontFamily: FONT,
-        fontSize: '18px',
-        color: '#FFE9C9'
+        fontSize: '20px',
+        color: '#FFD23F',
+        fontStyle: 'bold'
       }).setOrigin(0.5).setInteractive({ useHandCursor: true });
-      locked.on('pointerdown', () => {
-        feel(this, 'button_click', 'soft');
+      statue.on('pointerdown', () => {
+        feel(this, 'golden_douglas', 'achievement');
       });
     }
 
-    this.add.text(W / 2, H - 50, S.kingdom ? 'Tap to replay the legendary moment!' : 'Keep exploring...', {
+    this.add.text(W/2, H - 50, 'Tap to replay the legendary moment!', {
       fontFamily: FONT,
       fontSize: '18px',
       color: '#FFD23F'
