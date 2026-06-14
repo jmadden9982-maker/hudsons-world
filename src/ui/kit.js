@@ -9,4 +9,9 @@ export function sceneBg(scene, key, top, bot) {
   return bg(scene, top, bot);
 }
 
-export { sceneBg };
+export function header(scene, title) {
+  const { width:W } = scene.scale;
+  scene.add.text(W/2, 30, title, { 
+    fontFamily:FONT, fontSize:'30px', color:'#7a4a00', fontStyle:'bold' 
+  }).setOrigin(0.5).setShadow(0,2,'#ffffff88',2);
+}
