@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { FONT, addPremiumHud, addBottomDock, sceneBg } from '../ui/kit.js';
+import { FONT, addPremiumHud, addBottomDock } from '../ui/kit.js';
 import { S } from '../systems/state.js';
 import { feel } from '../systems/feel.js';
 
@@ -9,11 +9,15 @@ export default class HudsonHouseScene extends Phaser.Scene {
   create() {
     const { width: W, height: H } = this.scale;
 
+    // Painted background (with fallback)
     if (this.textures.exists('bg_house')) {
-      sceneBg(this, 'bg_house', 0xFFF1DA, 0xFFE2B8);
+      const bg = this.add.image(W/2, H/2, 'bg_house');
+      const sc = Math.max(W / bg.width, H / bg.height);
+      bg.setScale(sc).setDepth(-100);
     } else {
+      // Fallback cosy room
       this.add.rectangle(0, 0, W, H, 0xFFF1DA).setOrigin(0);
-      this.add.rectangle(0, H - 130, W, 130, 0xC79A66).setOrigin(0);
+      this.add.rectangle(0, H-130, W, 130, 0xC79A66).setOrigin(0);
     }
 
     feel(this, 'button_confirm', 'soft');
