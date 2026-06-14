@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 
-// Import all scenes
-import BootScene from './scenes/BootScene.js';
+// Import scenes that exist
+ import BootScene from './scenes/BootScene.js';
 import PreloadScene from './scenes/PreloadScene.js';
 import MainMenuScene from './scenes/MainMenuScene.js';
 import WorldMapScene from './scenes/WorldMapScene.js';
@@ -14,7 +14,6 @@ import TrophyRoomScene from './scenes/TrophyRoomScene.js';
 import WardrobeScene from './scenes/WardrobeScene.js';
 import GameOverScene from './scenes/GameOverScene.js';
 
-// Game configuration
 const config = {
   type: Phaser.AUTO,
   parent: 'game',
@@ -23,9 +22,7 @@ const config = {
   backgroundColor: '#1b1430',
   scale: {
     mode: Phaser.Scale.FIT,
-    autoCenter: Phaser.Scale.CENTER_BOTH,
-    min: { width: 320, height: 568 },
-    max: { width: 1280, height: 2560 }
+    autoCenter: Phaser.Scale.CENTER_BOTH
   },
   physics: {
     default: 'arcade',
@@ -50,5 +47,4 @@ const config = {
   ]
 };
 
-// Start the game
 new Phaser.Game(config);
