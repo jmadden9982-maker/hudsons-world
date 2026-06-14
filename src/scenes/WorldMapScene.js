@@ -8,40 +8,55 @@ export default class WorldMapScene extends Phaser.Scene {
   create() {
     const { width, height } = this.scale;
 
+    // Sky + ground
     this.add.rectangle(0, 0, width, height, 0x87CEEB).setOrigin(0);
+    this.add.rectangle(0, height * 0.7, width, height * 0.3, 0x228B22).setOrigin(0);
 
-    this.add.text(width / 2, 60, 'Adventure Map', {
+    this.add.text(width / 2, 55, 'Adventure Map', {
       fontSize: '36px',
       color: '#ffffff',
       fontStyle: 'bold'
     }).setOrigin(0.5);
 
+    // Zone cards arranged like a map
     const zones = [
-      { name: 'Douglas Dash', scene: 'DouglasDashScene', color: 0x228B22 },
-      { name: 'Hudson House', scene: 'HudsonHouseScene', color: 0x8B4513 },
-      { name: 'Douglas Den', scene: 'DouglasDenScene', color: 0xD2691E },
-      { name: 'Journal', scene: 'AdventureJournalScene', color: 0x4B0082 },
-      { name: 'Photo Wall', scene: 'FamilyPhotoWallScene', color: 0xFF6347 },
-      { name: 'Trophy Room', scene: 'TrophyRoomScene', color: 0xFFD700 },
-      { name: 'Wardrobe', scene: 'WardrobeScene', color: 0x9370DB }
+      { name: 'Douglas Dash', emoji: '🐕', scene: 'DouglasDashScene', x: 200, y: 220, color: 0x228B22 },
+      { name: 'Hudson House', emoji: '🏠', scene: 'HudsonHouseScene', x: 520, y: 220, color: 0x8B4513 },
+      { name: 'Douglas Den', emoji: '🦴', scene: 'DouglasDenScene', x: 360, y: 380, color: 0xD2691E },
+      { name: 'Journal', emoji: '📖', scene: 'AdventureJournalScene', x: 200, y: 540, color: 0x4B0082 },
+      { name: 'Photo Wall', emoji: '📸', scene: 'FamilyPhotoWallScene', x: 520, y: 540, color: 0xFF6347 },
+      { name: 'Trophy Room', emoji: '🏆', scene: 'TrophyRoomScene', x: 200, y: 700, color: 0xFFD700 },
+      { name: 'Wardrobe', emoji: '👕', scene: 'WardrobeScene', x: 520, y: 700, color: 0x9370DB }
     ];
 
-    zones.forEach((zone, i) => {
-      const col = i % 2;
-      const row = Math.floor(i / 2);
-      const x = 180 + col * 360;
-      const y = 180 + row * 140;
+    zones.forEach(zone => {
+      const card = this.add.rectangle(zone.x, zone.y, 240, 100, zone.color).setInteractive({ useHandCursor: true });
 
-      const card = this.add.rectangle(x, y, 280, 100, zone.color).setInteractive({ useHandCursor: true });
-      this.add.text(x, y, zone.name, {
-        fontSize: '24px',
+      this.add.text(zone.x, zone.y - 15, zone.emoji + ' ' + zone.name, {
+        fontSize: '20px',
         color: '#ffffff',
         fontStyle: 'bold'
       }).setOrigin(0.5);
 
+      // Simple pulse on tap
       card.on('pointerdown', () => {
+        this.tweens.add({
+          targets: card,
+          scaleX: 0.92,
+          scaleY: 0.92,
+          duration: 80,
+          yoyo: true
+        });
         this.scene.start(zone.scene);
       });
     });
+
+    // Simple path lines between zones
+    const graphics = this.add.graphics();
+    graphics.lineStyle(4, 0xffffff, 0.6);
+    graphics.lineBetween(320, 270, 360, 330);
+    graphics.lineBetween(440, 330, 360, 430);
+    graphics.lineBetween(320, 590, 360, 650);
+    graphics.lineBetween(440, 650, 360, 750);
   }
 }
