@@ -1,20 +1,20 @@
 import Phaser from 'phaser';
+import AudioManager from '../systems/AudioManager.js';
 import SaveSystem from '../systems/SaveSystem.js';
 
 export default class DouglasDashScene extends Phaser.Scene {
   constructor() {
     super('DouglasDashScene');
-    this.score = 0;
-    this.isGameOver = false;
   }
 
   create() {
+    AudioManager.setScene(this);
+
     const { width: W, height: H } = this.scale;
 
     this.score = 0;
     this.isGameOver = false;
 
-    // Background layers (simplified for now)
     this.add.rectangle(0, 0, W, H, 0x87CEEB).setOrigin(0);
     this.ground = this.add.rectangle(0, H - 60, W, 60, 0x228B22).setOrigin(0);
     this.physics.add.existing(this.ground, true);
@@ -24,16 +24,8 @@ export default class DouglasDashScene extends Phaser.Scene {
     this.doug.body.setCollideWorldBounds(true);
     this.physics.add.collider(this.doug, this.ground);
 
-    this.scoreText = this.add.text(30, 30, 'Score: 0', {
-      fontSize: '28px',
-      color: '#ffffff',
-      fontStyle: 'bold'
-    });
-
-    this.highScoreText = this.add.text(30, 70, 'Best: ' + SaveSystem.getHighScore(), {
-      fontSize: '20px',
-      color: '#FFD23F'
-    });
+    this.scoreText = this.add.text(30, 30, 'Score: 0', { fontSize: '28px', color: '#ffffff', fontStyle: 'bold' });
+    this.highScoreText = this.add.text(30, 70, 'Best: ' + SaveSystem.getHighScore(), { fontSize: '20px', color: '#FFD23F' });
 
     this.input.on('pointerdown', () => this.jump());
 
@@ -80,8 +72,8 @@ export default class DouglasDashScene extends Phaser.Scene {
     this.scoreText.setText('Score: ' + this.score);
     item.destroy();
 
-    // Award stars via SaveSystem
     SaveSystem.addStars(points);
+    AudioManager.playSfx('bone_collect');
   }
 
   hitObstacle() {
@@ -89,7 +81,6 @@ export default class DouglasDashScene extends Phaser.Scene {
     this.isGameOver = true;
     this.physics.pause();
 
-    // Save high score
     const newHigh = SaveSystem.setHighScore(this.score);
     this.highScoreText.setText('Best: ' + newHigh);
 
@@ -100,7 +91,6 @@ export default class DouglasDashScene extends Phaser.Scene {
 
   update() {
     if (this.isGameOver) return;
-
     this.obstacles.children.iterate(ob => { if (ob && ob.x < -50) ob.destroy(); });
     this.collectibles.children.iterate(item => { if (item && item.x < -30) item.destroy(); });
   }

@@ -23,7 +23,7 @@ export default class DouglasDenScene extends Phaser.Scene {
     this.add.text(width / 2, height / 2 + 50, 'Douglas', { fontSize: '24px', color: '#3b2b20' }).setOrigin(0.5);
 
     douglas.on('pointerdown', () => {
-      AudioManager.playSfx('button_click');
+      AudioManager.playSfx('douglas_happy');
       this.add.text(width / 2, height / 2 - 80, 'Douglas is happy!', { fontSize: '20px', color: '#FFD23F' }).setOrigin(0.5);
       this.time.delayedCall(900, () => this.scene.start('WorldMapScene'));
     });
@@ -32,7 +32,7 @@ export default class DouglasDenScene extends Phaser.Scene {
     this.add.text(width / 2 - 160, height / 2 + 160, 'Pet Douglas', { fontSize: '20px', color: '#fff' }).setOrigin(0.5);
 
     petBtn.on('pointerdown', () => {
-      AudioManager.playSfx('button_confirm');
+      AudioManager.playSfx('douglas_happy');
       this.add.text(width / 2 - 160, height / 2 + 110, 'Good boy!', { fontSize: '18px', color: '#FFD23F' }).setOrigin(0.5);
       this.time.delayedCall(800, () => this.scene.start('WorldMapScene'));
     });
@@ -41,7 +41,7 @@ export default class DouglasDenScene extends Phaser.Scene {
     this.add.text(width / 2 + 160, height / 2 + 160, 'Give Treat', { fontSize: '20px', color: '#fff' }).setOrigin(0.5);
 
     treatBtn.on('pointerdown', () => {
-      AudioManager.playSfx('button_confirm');
+      AudioManager.playSfx('douglas_bark');
       this.add.text(width / 2 + 160, height / 2 + 110, 'Yummy!', { fontSize: '18px', color: '#FFD23F' }).setOrigin(0.5);
       this.time.delayedCall(800, () => this.scene.start('WorldMapScene'));
     });
