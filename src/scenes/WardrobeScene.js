@@ -19,9 +19,9 @@ export default class WardrobeScene extends Phaser.Scene {
 
     this.currentOutfit = SaveSystem.getCurrentOutfit();
 
-    // Preview
+    // === HUDSON PREVIEW ===
     this.preview = this.add.rectangle(width / 2, 280, 140, 180, 0xFFCC80);
-    this.add.text(width / 2, 280, '👦', { fontSize: '80px' }).setOrigin(0.5);
+    this.hudsonEmoji = this.add.text(width / 2, 280, '👦', { fontSize: '80px' }).setOrigin(0.5);
 
     this.outfitLabel = this.add.text(width / 2, 400, this.getOutfitName(this.currentOutfit), {
       fontSize: '22px',
@@ -29,13 +29,16 @@ export default class WardrobeScene extends Phaser.Scene {
       fontStyle: 'bold'
     }).setOrigin(0.5);
 
+    // === OUTFIT CARDS ===
+    this.outfitCards = {};
+
     const outfits = [
-      { id: 'everyday', name: 'Everyday', emoji: '👕', unlocked: true, color: 0x81D4FA },
-      { id: 'super', name: 'Super Hudson', emoji: '🦸', unlocked: true, color: 0xFF5252 },
-      { id: 'pirate', name: 'Pirate', emoji: '🏴‍☠️', unlocked: true, color: 0x5D4037 },
-      { id: 'dino', name: 'Dino Explorer', emoji: '🦖', unlocked: false, color: 0x4CAF50 },
-      { id: 'space', name: 'Space Hudson', emoji: '🚀', unlocked: false, color: 0x2196F3 },
-      { id: 'golden', name: 'Golden Explorer', emoji: '👑', unlocked: false, color: 0xFFD700 }
+      { id: 'everyday', name: 'Everyday', emoji: '👕', unlocked: true, color: 0x81D4FA, special: false },
+      { id: 'super', name: 'Super Hudson', emoji: '🦸', unlocked: true, color: 0xFF5252, special: true },
+      { id: 'pirate', name: 'Pirate', emoji: '🏴‍☠️', unlocked: true, color: 0x5D4037, special: true },
+      { id: 'dino', name: 'Dino Explorer', emoji: '🦖', unlocked: false, color: 0x4CAF50, special: true },
+      { id: 'space', name: 'Space Hudson', emoji: '🚀', unlocked: false, color: 0x2196F3, special: true },
+      { id: 'golden', name: 'Golden Explorer', emoji: '👑', unlocked: false, color: 0xFFD700, special: true, legendary: true }
     ];
 
     outfits.forEach((outfit, i) => {
@@ -46,6 +49,8 @@ export default class WardrobeScene extends Phaser.Scene {
 
       const bgColor = outfit.unlocked ? outfit.color : 0x757575;
       const card = this.add.rectangle(x, y, 180, 110, bgColor).setInteractive({ useHandCursor: true });
+
+      this.outfitCards[outfit.id] = card;
 
       this.add.text(x, y - 20, outfit.emoji, { fontSize: '36px' }).setOrigin(0.5);
       this.add.text(x, y + 25, outfit.name, {
@@ -62,11 +67,23 @@ export default class WardrobeScene extends Phaser.Scene {
         if (outfit.unlocked) {
           this.equipOutfit(outfit, card);
         } else {
-          this.add.text(x, y + 70, 'Locked!', { fontSize: '16px', color: '#FFD23F' }).setOrigin(0.5);
-          this.time.delayedCall(600, () => this.scene.start('WorldMapScene'));
+          // Locked feedback - gentle shake
+          this.tweens.add({
+            targets: card,
+            x: card.x + 8,
+            duration: 60,
+            yoyo: true,
+            repeat: 2
+          });
         }
       });
     });
+
+    // Highlight current outfit
+    if (this.outfitCards[this.currentOutfit]) {
+      const currentCard = this.outfitCards[this.currentOutfit];
+      currentCard.setStrokeStyle(4, 0xFFD700);
+    }
 
     this.add.text(width / 2, height - 45, 'Tap an outfit to equip', {
       fontSize: '18px',
@@ -87,25 +104,45 @@ export default class WardrobeScene extends Phaser.Scene {
   }
 
   equipOutfit(outfit, card) {
-    this.outfitLabel.setText(outfit.name);
+    // Deselect previous
+    if (this.outfitCards[this.currentOutfit]) {
+      this.outfitCards[this.currentOutfit].setStrokeStyle();
+    }
 
+    // Select new
+    card.setStrokeStyle(4, 0xFFD700);
+
+    // Preview animation
     this.tweens.add({
-      targets: card,
-      scaleX: 1.1,
-      scaleY: 1.1,
-      duration: 200,
-      yoyo: true
+      targets: [this.preview, this.hudsonEmoji],
+      scaleX: 1.12,
+      scaleY: 1.12,
+      duration: 120,
+      yoyo: true,
+      ease: 'Back.easeOut'
     });
 
-    this.add.particles(card.x, card.y, 'particle_sparkle', {
+    // Sparkle around Hudson
+    this.add.particles(this.preview.x, this.preview.y, 'particle_sparkle', {
       speed: { min: 40, max: 90 },
-      scale: { start: 0.4, end: 0 },
+      scale: { start: 0.45, end: 0 },
       lifespan: 500
-    }).explode(8);
+    }).explode(outfit.legendary ? 14 : 8);
 
+    // Extra legendary effects
+    if (outfit.legendary) {
+      this.add.particles(this.preview.x, this.preview.y, 'particle_confetti', {
+        speed: { min: 50, max: 110 },
+        scale: { start: 0.5, end: 0 },
+        lifespan: 650
+      }).explode(8);
+    }
+
+    this.outfitLabel.setText(outfit.name);
     SaveSystem.setCurrentOutfit(outfit.id);
+    this.currentOutfit = outfit.id;
 
-    this.time.delayedCall(800, () => {
+    this.time.delayedCall(850, () => {
       this.scene.start('WorldMapScene');
     });
   }
