@@ -1,7 +1,6 @@
 import Phaser from 'phaser';
 import { FONT, addPremiumHud, addBottomDock, sceneBg } from '../ui/kit.js';
 import { S } from '../systems/state.js';
-import { SFX } from '../systems/audio.js';
 import { feel } from '../systems/feel.js';
 
 export default class HudsonHouseScene extends Phaser.Scene {
