@@ -1,4 +1,3 @@
-/** @type {import('@capacitor/cli').CapacitorConfig} */
 const config = {
   appId: 'com.hudsonsworld.game',
   appName: "Hudson's World",
@@ -8,4 +7,4 @@ const config = {
   }
 };
 
-export default config;
+module.exports = config;
