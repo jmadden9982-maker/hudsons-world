@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import SaveSystem from '../systems/SaveSystem.js';
 
 export default class HudsonHouseScene extends Phaser.Scene {
   constructor() {
@@ -17,7 +18,7 @@ export default class HudsonHouseScene extends Phaser.Scene {
       fontStyle: 'bold'
     }).setOrigin(0.5);
 
-    // === DAILY REWARD CHEST ===
+    // Daily Reward Chest
     const chest = this.add.rectangle(width / 2, 260, 150, 110, 0x8B4513).setInteractive({ useHandCursor: true });
     this.add.text(width / 2, 260, '🎁 Daily Chest', {
       fontSize: '20px',
@@ -36,36 +37,24 @@ export default class HudsonHouseScene extends Phaser.Scene {
 
     chest.on('pointerdown', () => this.openDailyChest());
 
-    // === BABY BELL HIDE & SEEK ===
-    const babyBellSpots = [
+    // Baby Bell spots
+    const spots = [
       { x: 160, y: 380, label: '🧸 Toy Box' },
       { x: width / 2, y: 480, label: '🛏️ Under Bed' },
       { x: width - 160, y: 380, label: '🪟 Window Sill' }
     ];
 
-    // Randomly pick one spot to hide Baby Bell
-    const hiddenSpot = Phaser.Math.RND.pick(babyBellSpots);
+    const hiddenSpot = Phaser.Math.RND.pick(spots);
 
-    babyBellSpots.forEach(spot => {
+    spots.forEach(spot => {
       const obj = this.add.rectangle(spot.x, spot.y, 110, 65, 0x696969).setInteractive({ useHandCursor: true });
       this.add.text(spot.x, spot.y, spot.label, { fontSize: '16px', color: '#fff' }).setOrigin(0.5);
 
       obj.on('pointerdown', () => {
-        if (spot.x === hiddenSpot.x && spot.y === hiddenSpot.y) {
-          // Found Baby Bell!
-          this.add.text(spot.x, spot.y - 50, '🐱 MEOW!', {
-            fontSize: '24px',
-            color: '#FFD23F',
-            fontStyle: 'bold'
-          }).setOrigin(0.5);
-
-          this.add.particles(spot.x, spot.y, 'particle_sparkle', {
-            speed: { min: 40, max: 100 },
-            scale: { start: 0.5, end: 0 },
-            lifespan: 600
-          }).explode(10);
-
-          this.time.delayedCall(900, () => this.scene.start('WorldMapScene'));
+        if (spot.x === hiddenSpot.x) {
+          SaveSystem.incrementBabyBellCount();
+          this.add.text(spot.x, spot.y - 50, '🐱 MEOW!', { fontSize: '24px', color: '#FFD23F' }).setOrigin(0.5);
+          this.time.delayedCall(800, () => this.scene.start('WorldMapScene'));
         } else {
           this.add.text(spot.x, spot.y - 40, 'Not here...', { fontSize: '16px', color: '#aaa' }).setOrigin(0.5);
           this.time.delayedCall(600, () => this.scene.start('WorldMapScene'));
@@ -77,10 +66,7 @@ export default class HudsonHouseScene extends Phaser.Scene {
     const douglas = this.add.rectangle(width - 140, 520, 70, 55, 0x8B4513).setInteractive({ useHandCursor: true });
     this.add.text(width - 140, 520, '🐕 Douglas', { fontSize: '16px', color: '#fff' }).setOrigin(0.5);
 
-    douglas.on('pointerdown', () => {
-      this.add.text(width - 140, 480, 'Tail wag!', { fontSize: '18px', color: '#FFD23F' }).setOrigin(0.5);
-      this.time.delayedCall(700, () => this.scene.start('WorldMapScene'));
-    });
+    douglas.on('pointerdown', () => this.scene.start('WorldMapScene'));
 
     this.add.text(width / 2, height - 45, 'Find Baby Bell! 🐱', {
       fontSize: '20px',
@@ -90,36 +76,25 @@ export default class HudsonHouseScene extends Phaser.Scene {
   }
 
   openDailyChest() {
-    const { width, height } = this.scale;
-    const overlay = this.add.rectangle(0, 0, width, height, 0x000000, 0.7).setOrigin(0).setInteractive();
+    const today = new Date().toISOString().split('T')[0];
+    const lastClaim = SaveSystem.getLastDailyReward();
 
-    this.add.text(width / 2, height / 2 - 50, '🎁 Daily Reward!', {
-      fontSize: '30px',
-      color: '#FFD700',
-      fontStyle: 'bold'
+    if (lastClaim === today) {
+      this.add.text(this.scale.width / 2, 180, 'Already claimed today!', { fontSize: '20px', color: '#ff0000' }).setOrigin(0.5);
+      return;
+    }
+
+    SaveSystem.setLastDailyReward(today);
+    SaveSystem.addStars(25);
+
+    // Simple claim popup
+    const popup = this.add.text(this.scale.width / 2, this.scale.height / 2, '🎁 +25 Stars!', {
+      fontSize: '28px',
+      color: '#FFD700'
     }).setOrigin(0.5);
 
-    this.add.text(width / 2, height / 2, '⭐ +25 Stars', {
-      fontSize: '26px',
-      color: '#ffffff'
-    }).setOrigin(0.5);
-
-    this.add.particles(width / 2, height / 2 - 10, 'particle_sparkle', {
-      speed: { min: 50, max: 110 },
-      scale: { start: 0.5, end: 0 },
-      lifespan: 700
-    }).explode(10);
-
-    const claim = this.add.text(width / 2, height / 2 + 90, 'Claim', {
-      fontSize: '24px',
-      color: '#fff',
-      backgroundColor: '#228B22',
-      padding: { x: 40, y: 12 }
-    }).setOrigin(0.5).setInteractive({ useHandCursor: true });
-
-    claim.on('pointerdown', () => {
-      overlay.destroy();
-      claim.destroy();
+    this.time.delayedCall(1200, () => {
+      popup.destroy();
       this.scene.start('WorldMapScene');
     });
   }
