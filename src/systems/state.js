@@ -48,3 +48,12 @@ export const TITLES = [
 ];
 
 export const xpNeed = (lvl) => (lvl || 1) * 100;
+// Number of family photos unlocked so far (one per level; the final bonus photo unlocks with the Kingdom).
+export function photosUnlocked(total) {
+  let n = 0;
+  for (let i = 0; i < total; i++) {
+    const bonus = i === total - 1;
+    if (bonus ? S.kingdom : S.level >= i + 1) n++;
+  }
+  return n;
+}
