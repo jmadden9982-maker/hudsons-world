@@ -55,7 +55,7 @@ export default class TrophyRoomScene extends Phaser.Scene {
       this.add.text(width / 2, y, ach.name, { fontSize: '20px', color: '#3b2b20', fontStyle: 'bold' }).setOrigin(0.5);
 
       card.on('pointerdown', () => {
-        AudioManager.playSfx('button_confirm');
+        AudioManager.playSfx('trophy_unlock');
         this.unlockTrophy(card, ach);
       });
     });
@@ -66,5 +66,58 @@ export default class TrophyRoomScene extends Phaser.Scene {
     }).setOrigin(0.5);
   }
 
-  unlockTrophy(card, ach) { /* existing unlock logic */ }
+  unlockTrophy(card, ach) {
+    this.time.delayedCall(180, () => {
+      this.tweens.add({
+        targets: card,
+        scaleX: 1.15,
+        scaleY: 1.15,
+        duration: 180,
+        yoyo: true,
+        ease: 'Back.easeOut'
+      });
+
+      const glow = this.add.circle(card.x, card.y, 60, 0xFFD700, 0.4);
+      this.tweens.add({
+        targets: glow,
+        scale: 2.2,
+        alpha: 0,
+        duration: 600,
+        onComplete: () => glow.destroy()
+      });
+
+      AudioManager.playSfx('sparkle');
+      this.add.particles(card.x, card.y, 'particle_sparkle', {
+        speed: { min: 50, max: 130 },
+        scale: { start: 0.5, end: 0 },
+        lifespan: 650
+      }).explode(ach.special ? 18 : 12);
+
+      if (ach.special) {
+        AudioManager.playSfx('celebration');
+        this.add.particles(card.x, card.y, 'particle_confetti', {
+          speed: { min: 60, max: 150 },
+          scale: { start: 0.6, end: 0 },
+          lifespan: 800
+        }).explode(10);
+      }
+
+      AudioManager.playSfx('achievement');
+      const popup = this.add.text(card.x, card.y - 70, '🏆 ' + ach.name + ' Unlocked!', {
+        fontSize: ach.special ? '24px' : '20px',
+        color: '#FFD700',
+        fontStyle: 'bold'
+      }).setOrigin(0.5);
+
+      this.tweens.add({
+        targets: popup,
+        y: card.y - 110,
+        alpha: 0,
+        duration: 900,
+        onComplete: () => popup.destroy()
+      });
+
+      SaveSystem.addStars(ach.special ? 100 : 25);
+    });
+  }
 }
