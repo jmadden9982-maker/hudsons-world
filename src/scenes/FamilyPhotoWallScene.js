@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import AudioManager from '../systems/AudioManager.js';
 import { FONT, makeHUD, makeDock, sceneBg, addBackButton } from '../ui/kit.js';
 import { S, photosUnlocked } from '../systems/state.js';
 import { SFX } from '../systems/audio.js';
@@ -11,6 +12,7 @@ export default class FamilyPhotoWallScene extends Phaser.Scene {
   constructor() { super('FamilyPhotoWallScene'); }
 
   create() {
+    AudioManager.setScene(this);
     const { width:W, height:H } = this.scale;
 
     const hasArt = this.textures.exists('bg_photowall');
@@ -60,7 +62,7 @@ export default class FamilyPhotoWallScene extends Phaser.Scene {
 
         fr.setSize(108, 116).setInteractive({ useHandCursor: true });
         fr.on('pointerdown', () => {
-          feel(this, 'photo_unlock', 'success');
+          feel(this, 'reward_reveal', 'success');
           this.showBigPhoto(i);
         });
       } else {
@@ -80,7 +82,7 @@ export default class FamilyPhotoWallScene extends Phaser.Scene {
   }
 
   showBigPhoto(i) {
-    feel(this, 'photo_unlock', 'success');
+    feel(this, 'reward_reveal', 'success');
     const { width: W, height: H } = this.scale;
     const ov = this.add.container(0, 0).setDepth(80);
     ov.add(this.add.rectangle(W/2, H/2, W, H, 0x140b22, 0.7).setInteractive());

@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import AudioManager from '../systems/AudioManager.js';
 import { FONT, addPremiumHud, addBottomDock, makeDouglasSprite } from '../ui/kit.js';
 import { S } from '../systems/state.js';
 import { feel } from '../systems/feel.js';
@@ -7,6 +8,9 @@ export default class HudsonHouseScene extends Phaser.Scene {
   constructor() { super('HudsonHouseScene'); }
 
   create() {
+    AudioManager.setScene(this);
+    AudioManager.playMusic('music_calm');
+
     const { width: W, height: H } = this.scale;
 
     // Painted background (with fallback)
@@ -132,7 +136,7 @@ export default class HudsonHouseScene extends Phaser.Scene {
     S.stars = (S.stars || 0) + 25;
     if (typeof persist === 'function') persist();
 
-    feel(this, 'chest_open', 'success');
+    feel(this, 'reward', 'success');
     const popup = this.add.text(this.scale.width / 2, 200, '🎁 +25 Stars!', {
       fontFamily: FONT,
       fontSize: '28px',

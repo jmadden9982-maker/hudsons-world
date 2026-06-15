@@ -9,6 +9,7 @@ export default class WorldMapScene extends Phaser.Scene {
 
   create() {
     AudioManager.setScene(this);
+    AudioManager.playMusic('music_calm');
 
     const { width, height } = this.scale;
 

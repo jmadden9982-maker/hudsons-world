@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import AudioManager from '../systems/AudioManager.js';
 import { FONT, makeHUD, makeDock, sceneBg, addBackButton } from '../ui/kit.js';
 import { S } from '../systems/state.js';
 import { SFX } from '../systems/audio.js';
@@ -8,6 +9,7 @@ export default class AdventureJournalScene extends Phaser.Scene {
   constructor() { super('AdventureJournalScene'); }
 
   create() {
+    AudioManager.setScene(this);
     const { width:W, height:H } = this.scale;
 
     sceneBg(this, 'bg_journal', 0xFBEAD0, 0xE6CBA6);

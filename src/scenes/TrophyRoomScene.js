@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import AudioManager from '../systems/AudioManager.js';
 import { FONT, sceneBg, addBackButton } from '../ui/kit.js';
 import { feel } from '../systems/feel.js';
 
@@ -6,6 +7,7 @@ export default class TrophyRoomScene extends Phaser.Scene {
   constructor() { super('TrophyRoomScene'); }
 
   create() {
+    AudioManager.setScene(this);
     const { width: W, height: H } = this.scale;
 
     if (this.textures.exists('bg_trophies')) sceneBg(this, 'bg_trophies', 0x6E4422, 0xB07B4F);
@@ -20,12 +22,12 @@ export default class TrophyRoomScene extends Phaser.Scene {
       const frame = this.add.image(W/2, H/2 - 60, 'ui_trophy_gold').setOrigin(0.5);
       frame.setDisplaySize(168, 202);
       frame.setInteractive({ useHandCursor: true });
-      frame.on('pointerdown', () => feel(this, 'golden_douglas', 'achievement'));
+      frame.on('pointerdown', () => feel(this, 'legendary_chime', 'achievement'));
     } else {
       const statue = this.add.text(W/2, H/2 - 60, '🐕✨ GOLDEN DOUGLAS STATUE ✨🐕', {
         fontSize: '22px', color: '#FFD23F', fontStyle: 'bold', align: 'center', wordWrap: { width: W * 0.8 }
       }).setOrigin(0.5).setInteractive({ useHandCursor: true });
-      statue.on('pointerdown', () => feel(this, 'golden_douglas', 'achievement'));
+      statue.on('pointerdown', () => feel(this, 'legendary_chime', 'achievement'));
     }
 
     this.add.text(W/2, H - 170, '✨ The Golden Douglas Trophy ✨', {

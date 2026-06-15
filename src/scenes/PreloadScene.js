@@ -37,6 +37,8 @@ export default class PreloadScene extends Phaser.Scene {
     ['hudson','douglas','babybell','finley','james','aimee'].forEach((n) => this.load.image('portrait_' + n, 'assets/portraits/' + n + '_portrait.png'));
     // SFX                  -> public/assets/audio/<key>.mp3
     SFX_KEYS.forEach((k) => this.load.audio(k, 'assets/audio/' + k + '.mp3'));
+    // Looping music (optional)  -> public/assets/audio/<key>.mp3  (stays silent until committed)
+    ['music_calm', 'music_playful'].forEach((k) => this.load.audio(k, 'assets/audio/' + k + '.mp3'));
   }
 
   create() {

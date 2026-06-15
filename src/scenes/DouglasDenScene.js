@@ -9,6 +9,7 @@ export default class DouglasDenScene extends Phaser.Scene {
 
   create() {
     AudioManager.setScene(this);
+    AudioManager.playMusic('music_playful');
 
     const { width, height } = this.scale;
 

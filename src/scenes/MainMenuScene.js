@@ -9,6 +9,7 @@ export default class MainMenuScene extends Phaser.Scene {
 
   create() {
     AudioManager.setScene(this);
+    AudioManager.playMusic('music_calm');
 
     const { width, height } = this.scale;
 
