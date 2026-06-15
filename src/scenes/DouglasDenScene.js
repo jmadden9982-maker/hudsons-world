@@ -36,10 +36,11 @@ export default class DouglasDenScene extends Phaser.Scene {
     // Gentle idle bob (works for sprite or rectangle).
     this.tweens.add({ targets: douglas, y: douglas.y - 10, duration: 900, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
 
+    // Tapping Douglas himself pets him (the Back button is the way out).
     douglas.on('pointerdown', () => {
       AudioManager.playSfx('douglas_happy');
-      this.add.text(width / 2, height / 2 - 80, 'Douglas is happy!', { fontSize: '20px', color: '#FFD23F' }).setOrigin(0.5);
-      this.time.delayedCall(900, () => this.scene.start('WorldMapScene'));
+      this.flashMessage('Douglas is happy! 🐶');
+      onPetDouglas(this);
     });
 
     const petBtn = this.add.rectangle(width / 2 - 160, height / 2 + 250, 160, 60, 0xFF69B4).setInteractive({ useHandCursor: true });

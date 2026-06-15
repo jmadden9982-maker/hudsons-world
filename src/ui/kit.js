@@ -50,11 +50,23 @@ export function panel(scene, x, y, w, h, color = 0xFFF6E0) {
 
 export function toast(scene, msg) {
   const { width: W, height: H } = scene.scale;
-  const t = scene.add.text(W / 2, H - 150, msg, {
+  if (!scene.__toastStack) scene.__toastStack = [];
+  const stack = scene.__toastStack;
+  const yBase = H - 150;
+  const t = scene.add.text(W / 2, yBase, msg, {
     fontFamily: FONT, fontSize: '20px', color: '#fff', fontStyle: 'bold',
     backgroundColor: '#3b2b20ee', padding: { x: 18, y: 10 }, align: 'center', wordWrap: { width: W * 0.82 }
   }).setOrigin(0.5).setDepth(200);
-  scene.tweens?.add({ targets: t, alpha: 0, delay: 2000, duration: 500, onComplete: () => t.destroy() });
+  stack.push(t);
+  // Stack toasts upward (newest at the bottom) so overlapping rewards stay readable.
+  const reflow = () => stack.forEach((o, i) => { if (o && o.active) o.y = yBase - (stack.length - 1 - i) * 46; });
+  reflow();
+  scene.tweens?.add({ targets: t, alpha: 0, delay: 2000, duration: 500, onComplete: () => {
+    const idx = stack.indexOf(t);
+    if (idx >= 0) stack.splice(idx, 1);
+    t.destroy();
+    reflow();
+  }});
   return t;
 }
 
@@ -98,7 +110,18 @@ export function makeHUD(scene) {
   d.add(scene.add.rectangle(sx + 20, 35, Math.max(1, (xpw - 4) * frac), 12, 0x6FD66F).setOrigin(0, 0.5));
   d.add(scene.add.text(sx, 35, '🛡️', { fontSize: '26px' }).setOrigin(0.5));
   d.add(scene.add.text(sx, 34, '' + (S.level ?? 1), { fontFamily: FONT, fontSize: '13px', color: '#3b2b20', fontStyle: 'bold' }).setOrigin(0.5));
+  scene.__hud = d; // remembered so refreshHUD() can rebuild it after rewards
   return d;
+}
+
+// Rebuild the top HUD in place so coin/star/level/XP reflect the latest state.
+// No-op for scenes that never created a HUD.
+export function refreshHUD(scene) {
+  if (scene && scene.__hud) {
+    try { scene.__hud.destroy(); } catch (e) {}
+    scene.__hud = null;
+    makeHUD(scene);
+  }
 }
 
 // Bottom navigation dock — all targets are registered scenes.

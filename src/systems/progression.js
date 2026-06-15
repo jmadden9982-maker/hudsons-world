@@ -3,7 +3,7 @@
 // star/XP rewards. Everything is guarded and never throws; all writes go through the
 // shared `S` blob + persist() so the HUD stays consistent.
 import { S, persist, xpNeed } from './state.js';
-import { toast } from '../ui/kit.js';
+import { toast, refreshHUD } from '../ui/kit.js';
 import AudioManager from './AudioManager.js';
 
 export const PHOTO_TOTAL = 11;
@@ -12,7 +12,7 @@ export const ACHIEVEMENTS = [
   { id: 'first_adventure', icon: '🏆', name: 'First Adventure', desc: "Enter Hudson's World" },
   { id: 'best_friend',     icon: '🐾', name: 'Best Friend',     desc: 'Pet Douglas 10 times' },
   { id: 'fashion_star',    icon: '✨', name: 'Fashion Star',    desc: 'Try 3 different outfits' },
-  { id: 'treasure_hunter', icon: '💰', name: 'Treasure Hunter', desc: 'Claim the chest 5 times' },
+  { id: 'treasure_hunter', icon: '💰', name: 'Treasure Hunter', desc: 'Claim the daily chest 5 times' },
   { id: 'speedy_paws',     icon: '⚡', name: 'Speedy Paws',     desc: 'Score 50 in Douglas Dash' },
   { id: 'memory_keeper',   icon: '📸', name: 'Memory Keeper',   desc: 'Unlock 5 photos' }
 ];
@@ -73,6 +73,7 @@ export function grantReward(scene, stars = 0, xp = 0, label = '') {
     while (S.xp >= xpNeed(S.level)) { S.xp -= xpNeed(S.level); S.level += 1; leveled = true; }
   }
   persist();
+  refreshHUD(scene); // live HUD update where a HUD exists (no-op elsewhere)
   sfx('reward');
   if (label) {
     const bits = [];
