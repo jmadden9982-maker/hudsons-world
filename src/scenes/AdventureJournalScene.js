@@ -11,7 +11,10 @@ export default class AdventureJournalScene extends Phaser.Scene {
     const { width:W, height:H } = this.scale;
 
     sceneBg(this, 'bg_journal', 0xFBEAD0, 0xE6CBA6);
-    this.add.text(W/2, 56, '📖 The Adventures of Hudson', { fontFamily: FONT, fontSize: '26px', color: '#7a4a00', fontStyle: 'bold' }).setOrigin(0.5);
+    // Calm the busy painted background so entries read clearly (sits above bg, below content).
+    this.add.rectangle(0, 0, W, H, 0xFBEAD0, 0.5).setOrigin(0).setDepth(-50);
+    // Smaller title, dropped below the top HUD bar to avoid overlap.
+    this.add.text(W/2, 88, '📖 The Adventures of Hudson', { fontFamily: FONT, fontSize: '22px', color: '#7a4a00', fontStyle: 'bold' }).setOrigin(0.5);
 
     const entries = S.journal.slice(0, 40);
     if (!entries.length) {
@@ -19,7 +22,7 @@ export default class AdventureJournalScene extends Phaser.Scene {
     }
 
     const view = this.add.container(0, 0);
-    let y = 92;
+    let y = 132;
     entries.forEach(e => {
       const card = this.add.container(W/2, y);
       const gold = /GOLDEN|Kingdom/i.test(e.title);

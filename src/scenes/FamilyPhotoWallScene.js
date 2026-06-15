@@ -17,14 +17,14 @@ export default class FamilyPhotoWallScene extends Phaser.Scene {
     if (hasArt) sceneBg(this, 'bg_photowall', 0x4E3015, 0x5E3A1C);
     else this.add.rectangle(0, 0, W, H, 0x3E2723).setOrigin(0);
 
-    this.add.text(W/2, 26, '📸 Family Photo Wall', { fontFamily: FONT, fontSize: '26px', color: '#FFE9C9', fontStyle: 'bold' }).setOrigin(0.5);
-    this.add.text(W/2, 56, photosUnlocked(TOTAL) + ' / ' + TOTAL + ' photos unlocked — tap one to see it big!', { fontFamily: FONT, fontSize: '14px', color: '#FFE9C9' }).setOrigin(0.5);
+    this.add.text(W/2, 84, '📸 Family Photo Wall', { fontFamily: FONT, fontSize: '22px', color: '#FFE9C9', fontStyle: 'bold' }).setOrigin(0.5);
+    this.add.text(W/2, 112, photosUnlocked(TOTAL) + ' / ' + TOTAL + ' photos unlocked — tap one to see it big!', { fontFamily: FONT, fontSize: '14px', color: '#FFE9C9' }).setOrigin(0.5);
 
     const cols = 6;
     const cw = 116;
     const ch = 118;
     const gx = (W - cols*cw)/2 + cw/2;
-    const gy = 120;
+    const gy = 176;
 
     for (let i = 0; i < TOTAL; i++) {
       const x = gx + (i%cols)*cw;
@@ -83,7 +83,7 @@ export default class FamilyPhotoWallScene extends Phaser.Scene {
     feel(this, 'photo_unlock', 'success');
     const { width: W, height: H } = this.scale;
     const ov = this.add.container(0, 0).setDepth(80);
-    ov.add(this.add.rectangle(W/2, H/2, W, H, 0x0a0614, 0.9).setInteractive());
+    ov.add(this.add.rectangle(W/2, H/2, W, H, 0x140b22, 0.7).setInteractive());
 
     const img = this.add.image(W/2, H/2 - 20, 'photo' + i);
     const s = Math.min(W * 0.72 / img.width, H * 0.68 / img.height);

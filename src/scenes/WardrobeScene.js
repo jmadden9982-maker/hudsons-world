@@ -13,14 +13,19 @@ export default class WardrobeScene extends Phaser.Scene {
 
     const { width, height } = this.scale;
 
-    if (this.textures.exists('bg_wardrobe')) sceneBg(this, 'bg_wardrobe', 0xEADFFB, 0xD7C3F5);
-    else this.add.rectangle(0, 0, width, height, 0xEADFFB).setOrigin(0);
-
-    this.add.text(width / 2, 50, 'Wardrobe', {
-      fontSize: '36px',
-      color: '#4A148C',
-      fontStyle: 'bold'
-    }).setOrigin(0.5);
+    if (this.textures.exists('bg_wardrobe')) {
+      sceneBg(this, 'bg_wardrobe', 0xEADFFB, 0xD7C3F5);
+      // Soft scrim so cards/text stay legible over the painted art.
+      this.add.rectangle(0, 0, width, height, 0xEADFFB, 0.32).setOrigin(0).setDepth(-50);
+    } else {
+      this.add.rectangle(0, 0, width, height, 0xEADFFB).setOrigin(0);
+      // Only show a scene title in the fallback; the painted background already says "Wardrobe".
+      this.add.text(width / 2, 50, 'Wardrobe', {
+        fontSize: '36px',
+        color: '#4A148C',
+        fontStyle: 'bold'
+      }).setOrigin(0.5);
+    }
 
     this.currentOutfit = SaveSystem.getCurrentOutfit();
 

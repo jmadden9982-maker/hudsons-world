@@ -24,9 +24,9 @@ export default class HudsonHouseScene extends Phaser.Scene {
     addPremiumHud(this);
     addBottomDock(this, 'HudsonHouseScene');
 
-    this.add.text(W / 2, 56, '🏡 Hudson House', {
+    this.add.text(W / 2, 86, '🏡 Hudson House', {
       fontFamily: FONT,
-      fontSize: '28px',
+      fontSize: '26px',
       color: '#7a4a00',
       fontStyle: 'bold'
     }).setOrigin(0.5);
@@ -100,7 +100,7 @@ export default class HudsonHouseScene extends Phaser.Scene {
     // bottom dock (dock occupies the lower 64px) and tappable to visit his den.
     let douglas = makeDouglasSprite(this, W - 110, H - 150, 'douglas_idle');
     if (douglas) {
-      douglas.setScale(0.38);
+      douglas.setScale(0.52);
       this.tweens.add({ targets: douglas, y: douglas.y - 8, duration: 1000, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
     } else {
       douglas = this.add.rectangle(W - 120, H - 120, 80, 60, 0x8B4513);

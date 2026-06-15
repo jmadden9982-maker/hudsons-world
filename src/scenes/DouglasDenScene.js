@@ -16,22 +16,23 @@ export default class DouglasDenScene extends Phaser.Scene {
     if (this.textures.exists('bg_den')) sceneBg(this, 'bg_den', 0xF5DEB3, 0xE8C99A);
     else this.add.rectangle(0, 0, width, height, 0xF5DEB3).setOrigin(0);
 
-    this.add.text(width / 2, 55, 'Douglas Den', {
-      fontSize: '36px',
-      color: '#3b2b20',
-      fontStyle: 'bold'
-    }).setOrigin(0.5);
+    // Only draw a scene title when there's no painted background (the art already names the den).
+    if (!this.textures.exists('bg_den')) {
+      this.add.text(width / 2, 55, 'Douglas Den', {
+        fontSize: '36px',
+        color: '#3b2b20',
+        fontStyle: 'bold'
+      }).setOrigin(0.5);
+    }
 
     // Real Douglas sprite if the sheet loaded, otherwise keep the brown rectangle.
-    let douglas = makeDouglasSprite(this, width / 2, height / 2 - 30, 'douglas_idle');
-    if (douglas) douglas.setScale(0.62);
-    else douglas = this.add.rectangle(width / 2, height / 2 - 30, 110, 90, 0x8B4513);
+    let douglas = makeDouglasSprite(this, width / 2, height / 2 - 60, 'douglas_idle');
+    if (douglas) douglas.setScale(0.9);
+    else douglas = this.add.rectangle(width / 2, height / 2 - 60, 150, 120, 0x8B4513);
     douglas.setInteractive({ useHandCursor: true });
 
     // Gentle idle bob (works for sprite or rectangle).
     this.tweens.add({ targets: douglas, y: douglas.y - 10, duration: 900, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
-
-    this.add.text(width / 2, height / 2 + 50, 'Douglas', { fontSize: '24px', color: '#3b2b20' }).setOrigin(0.5);
 
     douglas.on('pointerdown', () => {
       AudioManager.playSfx('douglas_happy');
@@ -39,8 +40,8 @@ export default class DouglasDenScene extends Phaser.Scene {
       this.time.delayedCall(900, () => this.scene.start('WorldMapScene'));
     });
 
-    const petBtn = this.add.rectangle(width / 2 - 160, height / 2 + 160, 160, 60, 0xFF69B4).setInteractive({ useHandCursor: true });
-    this.add.text(width / 2 - 160, height / 2 + 160, 'Pet Douglas', { fontSize: '20px', color: '#fff' }).setOrigin(0.5);
+    const petBtn = this.add.rectangle(width / 2 - 160, height / 2 + 250, 160, 60, 0xFF69B4).setInteractive({ useHandCursor: true });
+    this.add.text(width / 2 - 160, height / 2 + 250, 'Pet Douglas', { fontSize: '20px', color: '#fff' }).setOrigin(0.5);
 
     petBtn.on('pointerdown', () => {
       AudioManager.playSfx('douglas_happy');
@@ -48,8 +49,8 @@ export default class DouglasDenScene extends Phaser.Scene {
       this.time.delayedCall(800, () => this.scene.start('WorldMapScene'));
     });
 
-    const treatBtn = this.add.rectangle(width / 2 + 160, height / 2 + 160, 160, 60, 0x32CD32).setInteractive({ useHandCursor: true });
-    this.add.text(width / 2 + 160, height / 2 + 160, 'Give Treat', { fontSize: '20px', color: '#fff' }).setOrigin(0.5);
+    const treatBtn = this.add.rectangle(width / 2 + 160, height / 2 + 250, 160, 60, 0x32CD32).setInteractive({ useHandCursor: true });
+    this.add.text(width / 2 + 160, height / 2 + 250, 'Give Treat', { fontSize: '20px', color: '#fff' }).setOrigin(0.5);
 
     treatBtn.on('pointerdown', () => {
       AudioManager.playSfx('douglas_bark');

@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import AudioManager from '../systems/AudioManager.js';
 import SaveSystem from '../systems/SaveSystem.js';
-import { addBackButton, sceneBg, makeDouglasSprite } from '../ui/kit.js';
+import { sceneBg, makeDouglasSprite, gameButton, COL } from '../ui/kit.js';
 
 export default class DouglasDashScene extends Phaser.Scene {
   constructor() {
@@ -32,12 +32,15 @@ export default class DouglasDashScene extends Phaser.Scene {
 
     this.dougSprite = makeDouglasSprite(this, this.doug.x, this.doug.y, 'douglas_run');
     if (this.dougSprite) {
-      this.dougSprite.setScale(0.30);
+      this.dougSprite.setScale(0.44).setDepth(5);
       this.doug.setVisible(false);
     }
 
-    this.scoreText = this.add.text(30, 30, 'Score: 0', { fontSize: '28px', color: '#ffffff', fontStyle: 'bold' });
-    this.highScoreText = this.add.text(30, 70, 'Best: ' + SaveSystem.getHighScore(), { fontSize: '20px', color: '#FFD23F' });
+    // Score with a dark outline + shadow so it stays readable over any background.
+    this.scoreText = this.add.text(30, 28, 'Score: 0', { fontSize: '28px', color: '#ffffff', fontStyle: 'bold' })
+      .setStroke('#1b1430', 6).setShadow(0, 2, '#000000', 4).setDepth(50);
+    this.highScoreText = this.add.text(30, 66, 'Best: ' + SaveSystem.getHighScore(), { fontSize: '20px', color: '#FFD23F' })
+      .setStroke('#1b1430', 5).setShadow(0, 2, '#000000', 4).setDepth(50);
 
     this.input.on('pointerdown', () => this.jump());
 
@@ -52,8 +55,8 @@ export default class DouglasDashScene extends Phaser.Scene {
 
     this.physics.world.gravity.y = 1100;
 
-    // Escape hatch back to the map (sits above the playfield, clear of score text)
-    addBackButton(this);
+    // Compact back button in the top-right — away from the bottom-left player and the score.
+    gameButton(this, W - 86, 44, 132, 52, '⬅ Back', COL.wood, () => this.scene.start('WorldMapScene')).setDepth(130);
   }
 
   jump() {
@@ -105,8 +108,8 @@ export default class DouglasDashScene extends Phaser.Scene {
   }
 
   update() {
-    // Keep the visible sprite locked onto the physics body.
-    if (this.dougSprite) { this.dougSprite.x = this.doug.x; this.dougSprite.y = this.doug.y; }
+    // Keep the visible sprite locked onto the physics body (nudged up so feet meet the ground).
+    if (this.dougSprite) { this.dougSprite.x = this.doug.x; this.dougSprite.y = this.doug.y - 8; }
     if (this.isGameOver) return;
     this.obstacles.children.iterate(ob => { if (ob && ob.x < -50) ob.destroy(); });
     this.collectibles.children.iterate(item => { if (item && item.x < -30) item.destroy(); });
