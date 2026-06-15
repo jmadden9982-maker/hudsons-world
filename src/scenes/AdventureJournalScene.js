@@ -13,10 +13,13 @@ export default class AdventureJournalScene extends Phaser.Scene {
     const { width:W, height:H } = this.scale;
 
     sceneBg(this, 'bg_journal', 0xFBEAD0, 0xE6CBA6);
-    // Calm the busy painted background so entries read clearly (sits above bg, below content).
-    this.add.rectangle(0, 0, W, H, 0xFBEAD0, 0.5).setOrigin(0).setDepth(-50);
-    // Smaller title, dropped below the top HUD bar to avoid overlap.
-    this.add.text(W/2, 88, '📖 The Adventures of Hudson', { fontFamily: FONT, fontSize: '22px', color: '#7a4a00', fontStyle: 'bold' }).setOrigin(0.5);
+    // Stronger scrim so entries read clearly over the painted cover.
+    this.add.rectangle(0, 0, W, H, 0xFBEAD0, 0.58).setOrigin(0).setDepth(-50);
+    // The painted journal cover already carries a title — only add one in the flat fallback,
+    // and keep it small so it doesn't compete with the artwork.
+    if (!this.textures.exists('bg_journal')) {
+      this.add.text(W/2, 86, '📖 The Adventures of Hudson', { fontFamily: FONT, fontSize: '18px', color: '#7a4a00', fontStyle: 'bold' }).setOrigin(0.5);
+    }
 
     const entries = S.journal.slice(0, 40);
     if (!entries.length) {

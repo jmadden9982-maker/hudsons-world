@@ -224,3 +224,58 @@ export function makeHudsonSprite(scene, x, y, anim = 'hudson_idle') {
     return spr;
   } catch (e) { return null; }
 }
+
+// A code-drawn cartoon Hudson — no art asset needed, always available.
+// Returns a container with setOutfit(color) which recolours just the shirt so
+// outfit changes are visible (not a flat tint of the whole body). Never throws.
+export function makeVectorHudson(scene, x, y, scale = 1) {
+  const c = scene.add.container(x, y);
+  const g = scene.add.graphics();
+  c.add(g);
+  c.shirtColor = 0x81D4FA;
+  c.redraw = function () {
+    const skin = 0xF6C79B, hair = 0x6E4422, pants = 0x35415F, shoe = 0x2f2a26, mouth = 0x7a4a2a, eye = 0x2b2b2b;
+    g.clear();
+    // legs + shoes
+    g.fillStyle(pants, 1);
+    g.fillRoundedRect(-26, 40, 20, 62, 8);
+    g.fillRoundedRect(6, 40, 20, 62, 8);
+    g.fillStyle(shoe, 1);
+    g.fillEllipse(-16, 106, 34, 18);
+    g.fillEllipse(16, 106, 34, 18);
+    // arms
+    g.fillStyle(skin, 1);
+    g.fillRoundedRect(-58, -16, 18, 70, 9);
+    g.fillRoundedRect(40, -16, 18, 70, 9);
+    // shirt (outfit colour)
+    g.fillStyle(c.shirtColor, 1);
+    g.fillRoundedRect(-46, -28, 92, 82, 24);
+    // hands
+    g.fillStyle(skin, 1);
+    g.fillCircle(-49, 56, 11);
+    g.fillCircle(49, 56, 11);
+    // neck + head + ears
+    g.fillStyle(skin, 1);
+    g.fillRect(-11, -46, 22, 24);
+    g.fillCircle(0, -74, 42);
+    g.fillCircle(-42, -74, 9);
+    g.fillCircle(42, -74, 9);
+    // hair (top cap + fringe)
+    g.fillStyle(hair, 1);
+    g.beginPath(); g.arc(0, -74, 44, Math.PI, 2 * Math.PI); g.fillPath();
+    g.fillRoundedRect(-44, -82, 88, 18, 9);
+    // eyes + cheeks + smile
+    g.fillStyle(eye, 1);
+    g.fillCircle(-15, -78, 5);
+    g.fillCircle(15, -78, 5);
+    g.fillStyle(0xff9aa2, 0.55);
+    g.fillCircle(-24, -66, 7);
+    g.fillCircle(24, -66, 7);
+    g.lineStyle(4, mouth, 1);
+    g.beginPath(); g.arc(0, -68, 15, 0.15 * Math.PI, 0.85 * Math.PI); g.strokePath();
+  };
+  c.setOutfit = function (color) { if (typeof color === 'number') c.shirtColor = color; c.redraw(); };
+  c.redraw();
+  c.setScale(scale);
+  return c;
+}

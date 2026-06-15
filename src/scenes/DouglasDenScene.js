@@ -27,6 +27,9 @@ export default class DouglasDenScene extends Phaser.Scene {
       }).setOrigin(0.5);
     }
 
+    // Static props so the den feels lived-in (drawn behind Douglas).
+    this.drawDenProps();
+
     // Real Douglas sprite if the sheet loaded, otherwise keep the brown rectangle.
     let douglas = makeDouglasSprite(this, width / 2, height / 2 - 60, 'douglas_idle');
     if (douglas) douglas.setScale(0.9);
@@ -67,6 +70,24 @@ export default class DouglasDenScene extends Phaser.Scene {
     }).setOrigin(0.5);
 
     addBackButton(this);
+  }
+
+  // Static decorative props (dog bed, bone, food bowl, ball, toy box) drawn behind Douglas.
+  drawDenProps() {
+    const { width, height } = this.scale;
+    const g = this.add.graphics().setDepth(-10);
+    // Dog bed cushion under Douglas.
+    g.fillStyle(0x8B5A2B, 1); g.fillEllipse(width / 2, height / 2 + 100, 250, 74);
+    g.fillStyle(0xC68A4E, 1); g.fillEllipse(width / 2, height / 2 + 96, 188, 48);
+    // Floor props as emoji.
+    const baseY = height / 2 + 124;
+    const props = [
+      { e: '🦴', x: width / 2 - 130, y: baseY },       // bone
+      { e: '🥣', x: width / 2 - 50,  y: baseY + 8 },    // food bowl
+      { e: '🎾', x: width / 2 + 50,  y: baseY + 4 },    // ball
+      { e: '🧺', x: width / 2 + 132, y: baseY - 6 }     // toy box
+    ];
+    props.forEach(p => this.add.text(p.x, p.y, p.e, { fontSize: '40px' }).setOrigin(0.5).setDepth(-9));
   }
 
   // Brief, self-clearing feedback above the buttons (so repeat taps don't pile up).

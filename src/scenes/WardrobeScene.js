@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import AudioManager from '../systems/AudioManager.js';
 import SaveSystem from '../systems/SaveSystem.js';
-import { addBackButton, sceneBg, makeHudsonSprite } from '../ui/kit.js';
+import { addBackButton, sceneBg, makeVectorHudson } from '../ui/kit.js';
 import { onOutfitEquip } from '../systems/progression.js';
 
 const OUTFITS = [
@@ -38,14 +38,8 @@ export default class WardrobeScene extends Phaser.Scene {
 
     this.currentOutfit = SaveSystem.getCurrentOutfit();
 
-    // Hudson preview: real sprite if the sheet loaded, otherwise the rectangle + emoji fallback.
-    this.hudson = makeHudsonSprite(this, width / 2, 280, 'hudson_idle');
-    if (this.hudson) {
-      this.hudson.setScale(0.78); // ~200px tall on the 720x1280 canvas
-    } else {
-      this.preview = this.add.rectangle(width / 2, 280, 140, 180, 0xFFCC80);
-      this.hudsonEmoji = this.add.text(width / 2, 280, '👦', { fontSize: '80px' }).setOrigin(0.5);
-    }
+    // Hudson preview: a clean code-drawn cartoon (no art asset needed); shirt recolours per outfit.
+    this.hudson = makeVectorHudson(this, width / 2, 268, 1.05);
 
     // Outfit badge floating beside Hudson + the equipped-outfit name beneath him.
     this.outfitBadge = this.add.text(width / 2 + 92, 222, '', { fontSize: '40px' }).setOrigin(0.5);
@@ -102,7 +96,7 @@ export default class WardrobeScene extends Phaser.Scene {
     this.outfitLabel.setText(outfit.name);
     this.outfitBadge.setText(outfit.emoji);
 
-    if (this.hudson) this.hudson.setTint(outfit.color);
+    if (this.hudson && this.hudson.setOutfit) this.hudson.setOutfit(outfit.color);
     else if (this.preview) this.preview.setFillStyle(outfit.color);
 
     Object.values(this.outfitCards).forEach(c => c.setStrokeStyle());
