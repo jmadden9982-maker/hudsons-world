@@ -1,7 +1,16 @@
 import Phaser from 'phaser';
 import AudioManager from '../systems/AudioManager.js';
 import SaveSystem from '../systems/SaveSystem.js';
-import { addBackButton, sceneBg } from '../ui/kit.js';
+import { addBackButton, sceneBg, makeHudsonSprite } from '../ui/kit.js';
+
+const OUTFITS = [
+  { id: 'everyday', name: 'Everyday',        emoji: '👕', unlocked: true,  color: 0x81D4FA },
+  { id: 'super',    name: 'Super Hudson',    emoji: '🦸', unlocked: true,  color: 0xFF5252 },
+  { id: 'pirate',   name: 'Pirate',          emoji: '🏴‍☠️', unlocked: true,  color: 0x5D4037 },
+  { id: 'dino',     name: 'Dino Explorer',   emoji: '🦖', unlocked: false, color: 0x4CAF50 },
+  { id: 'space',    name: 'Space Hudson',    emoji: '🚀', unlocked: false, color: 0x2196F3 },
+  { id: 'golden',   name: 'Golden Explorer', emoji: '👑', unlocked: false, color: 0xFFD700, legendary: true }
+];
 
 export default class WardrobeScene extends Phaser.Scene {
   constructor() {
@@ -21,35 +30,30 @@ export default class WardrobeScene extends Phaser.Scene {
       this.add.rectangle(0, 0, width, height, 0xEADFFB).setOrigin(0);
       // Only show a scene title in the fallback; the painted background already says "Wardrobe".
       this.add.text(width / 2, 50, 'Wardrobe', {
-        fontSize: '36px',
-        color: '#4A148C',
-        fontStyle: 'bold'
+        fontSize: '36px', color: '#4A148C', fontStyle: 'bold'
       }).setOrigin(0.5);
     }
 
     this.currentOutfit = SaveSystem.getCurrentOutfit();
 
-    this.preview = this.add.rectangle(width / 2, 280, 140, 180, 0xFFCC80);
-    this.hudsonEmoji = this.add.text(width / 2, 280, '👦', { fontSize: '80px' }).setOrigin(0.5);
+    // Hudson preview: real sprite if the sheet loaded, otherwise the rectangle + emoji fallback.
+    this.hudson = makeHudsonSprite(this, width / 2, 280, 'hudson_idle');
+    if (this.hudson) {
+      this.hudson.setScale(0.78); // ~200px tall on the 720x1280 canvas
+    } else {
+      this.preview = this.add.rectangle(width / 2, 280, 140, 180, 0xFFCC80);
+      this.hudsonEmoji = this.add.text(width / 2, 280, '👦', { fontSize: '80px' }).setOrigin(0.5);
+    }
 
-    this.outfitLabel = this.add.text(width / 2, 400, this.getOutfitName(this.currentOutfit), {
-      fontSize: '22px',
-      color: '#4A148C',
-      fontStyle: 'bold'
+    // Outfit badge floating beside Hudson + the equipped-outfit name beneath him.
+    this.outfitBadge = this.add.text(width / 2 + 92, 222, '', { fontSize: '40px' }).setOrigin(0.5);
+    this.outfitLabel = this.add.text(width / 2, 400, '', {
+      fontSize: '22px', color: '#4A148C', fontStyle: 'bold'
     }).setOrigin(0.5);
 
-    const outfits = [
-      { id: 'everyday', name: 'Everyday', emoji: '👕', unlocked: true, color: 0x81D4FA, special: false },
-      { id: 'super', name: 'Super Hudson', emoji: '🦸', unlocked: true, color: 0xFF5252, special: true },
-      { id: 'pirate', name: 'Pirate', emoji: '🏴‍☠️', unlocked: true, color: 0x5D4037, special: true },
-      { id: 'dino', name: 'Dino Explorer', emoji: '🦖', unlocked: false, color: 0x4CAF50, special: true },
-      { id: 'space', name: 'Space Hudson', emoji: '🚀', unlocked: false, color: 0x2196F3, special: true },
-      { id: 'golden', name: 'Golden Explorer', emoji: '👑', unlocked: false, color: 0xFFD700, special: true, legendary: true }
-    ];
-
+    // Outfit selection grid.
     this.outfitCards = {};
-
-    outfits.forEach((outfit, i) => {
+    OUTFITS.forEach((outfit, i) => {
       const col = i % 3;
       const row = Math.floor(i / 3);
       const x = 140 + col * 220;
@@ -75,16 +79,44 @@ export default class WardrobeScene extends Phaser.Scene {
       });
     });
 
-    if (this.outfitCards[this.currentOutfit]) {
-      this.outfitCards[this.currentOutfit].setStrokeStyle(4, 0xFFD700);
-    }
+    // Apply whatever outfit is currently saved (fall back to the first unlocked one).
+    const current = OUTFITS.find(o => o.id === this.currentOutfit && o.unlocked) || OUTFITS[0];
+    this.applyOutfitVisual(current);
 
     this.add.text(width / 2, height - 45, 'Tap an outfit to equip', {
-      fontSize: '18px', color: '#4A148C' }).setOrigin(0.5);
+      fontSize: '18px', color: '#4A148C'
+    }).setOrigin(0.5);
 
     addBackButton(this);
   }
 
-  getOutfitName(id) { /* ... */ }
-  equipOutfit(outfit, card) { /* ... existing logic with AudioManager already called above ... */ }
+  getOutfitName(id) {
+    const o = OUTFITS.find(x => x.id === id);
+    return o ? o.name : 'Everyday';
+  }
+
+  // Update the preview (tint/colour, badge, name) and the selected-card highlight.
+  applyOutfitVisual(outfit) {
+    this.outfitLabel.setText(outfit.name);
+    this.outfitBadge.setText(outfit.emoji);
+
+    if (this.hudson) this.hudson.setTint(outfit.color);
+    else if (this.preview) this.preview.setFillStyle(outfit.color);
+
+    Object.values(this.outfitCards).forEach(c => c.setStrokeStyle());
+    const sel = this.outfitCards[outfit.id];
+    if (sel) sel.setStrokeStyle(4, 0xFFD700);
+  }
+
+  equipOutfit(outfit, card) {
+    this.currentOutfit = outfit.id;
+    SaveSystem.setCurrentOutfit(outfit.id);
+    this.applyOutfitVisual(outfit);
+
+    // Little pop so the change reads as an action.
+    const target = this.hudson || this.preview;
+    if (target) {
+      this.tweens.add({ targets: target, scaleX: target.scaleX * 1.08, scaleY: target.scaleY * 1.08, duration: 110, yoyo: true });
+    }
+  }
 }

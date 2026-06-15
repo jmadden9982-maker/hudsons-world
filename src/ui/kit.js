@@ -176,3 +176,28 @@ export function makeDouglasSprite(scene, x, y, anim = 'douglas_idle') {
     return spr;
   } catch (e) { return null; }
 }
+
+// ---- Hudson sprite support (optional) --------------------------------------
+// Same guarded pattern as Douglas: no-ops to null if 'hudson_sheet' never loaded.
+export function ensureHudsonAnims(scene) {
+  try {
+    if (!scene.textures.exists('hudson_sheet')) return false;
+    if (!scene.anims.exists('hudson_idle')) {
+      scene.anims.create({
+        key: 'hudson_idle',
+        frames: scene.anims.generateFrameNumbers('hudson_sheet', { start: 0, end: 2 }),
+        frameRate: 4, repeat: -1, yoyo: true
+      });
+    }
+    return true;
+  } catch (e) { return false; }
+}
+
+export function makeHudsonSprite(scene, x, y, anim = 'hudson_idle') {
+  try {
+    if (!ensureHudsonAnims(scene)) return null;
+    const spr = scene.add.sprite(x, y, 'hudson_sheet', 0);
+    if (scene.anims.exists(anim)) spr.play(anim);
+    return spr;
+  } catch (e) { return null; }
+}
