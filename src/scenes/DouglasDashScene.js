@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import AudioManager from '../systems/AudioManager.js';
 import SaveSystem from '../systems/SaveSystem.js';
 import { sceneBg, makeDouglasSprite, gameButton, COL } from '../ui/kit.js';
+import { onDashStart, onDashEnd } from '../systems/progression.js';
 
 export default class DouglasDashScene extends Phaser.Scene {
   constructor() {
@@ -15,6 +16,9 @@ export default class DouglasDashScene extends Phaser.Scene {
 
     this.score = 0;
     this.isGameOver = false;
+
+    // First Dash play: journal entry + unlock photo 4.
+    onDashStart(this);
 
     // Painted sky background if committed, else the original flat colour.
     if (this.textures.exists('bg_dash')) sceneBg(this, 'bg_dash', 0x87CEEB, 0xBFE9FF);
@@ -102,7 +106,10 @@ export default class DouglasDashScene extends Phaser.Scene {
     const newHigh = SaveSystem.setHighScore(this.score);
     this.highScoreText.setText('Best: ' + newHigh);
 
-    this.time.delayedCall(600, () => {
+    // Progression: score-milestone rewards (trophy / photo / journal) + run XP.
+    onDashEnd(this, this.score);
+
+    this.time.delayedCall(900, () => {
       this.scene.start('GameOverScene', { score: this.score });
     });
   }

@@ -20,6 +20,16 @@ export const S = {
   babyBellCount: 0,
   goldenDouglasFound: false,
   journalFavourites: [],
+  // --- Phase 10F progression (all default-safe for old saves via Object.assign) ---
+  achievements: {},       // { achievementId: true }
+  unlockedPhotos: [],     // explicit photo indices unlocked by events
+  outfitsTried: [],       // distinct outfit ids equipped
+  dashMilestones: {},     // { m10, m25, m50 }
+  petCount: 0,
+  chestClaims: 0,
+  gaveTreat: false,
+  playedDash: false,
+  hasLaunched: false,
   settings: { sound: true, music: true, calm: false, vibration: true },
   _v: 1
 };

@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import AudioManager from '../systems/AudioManager.js';
 import { sceneBg } from '../ui/kit.js';
+import { onFirstLaunch } from '../systems/progression.js';
 
 export default class MainMenuScene extends Phaser.Scene {
   constructor() {
@@ -10,6 +11,9 @@ export default class MainMenuScene extends Phaser.Scene {
   create() {
     AudioManager.setScene(this);
     AudioManager.playMusic('music_calm');
+
+    // First-ever launch: seed the journal + first photo + welcome trophy.
+    onFirstLaunch(this);
 
     const { width, height } = this.scale;
 

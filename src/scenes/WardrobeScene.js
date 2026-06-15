@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import AudioManager from '../systems/AudioManager.js';
 import SaveSystem from '../systems/SaveSystem.js';
 import { addBackButton, sceneBg, makeHudsonSprite } from '../ui/kit.js';
+import { onOutfitEquip } from '../systems/progression.js';
 
 const OUTFITS = [
   { id: 'everyday', name: 'Everyday',        emoji: '👕', unlocked: true,  color: 0x81D4FA },
@@ -119,5 +120,8 @@ export default class WardrobeScene extends Phaser.Scene {
     if (target) {
       this.tweens.add({ targets: target, scaleX: target.scaleX * 1.08, scaleY: target.scaleY * 1.08, duration: 110, yoyo: true });
     }
+
+    // Progression: reward the first time each distinct outfit is tried.
+    onOutfitEquip(this, outfit.id);
   }
 }

@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import AudioManager from '../systems/AudioManager.js';
 import { addBackButton, sceneBg, makeDouglasSprite } from '../ui/kit.js';
+import { onPetDouglas, onTreatDouglas } from '../systems/progression.js';
 
 export default class DouglasDenScene extends Phaser.Scene {
   constructor() {
@@ -46,8 +47,8 @@ export default class DouglasDenScene extends Phaser.Scene {
 
     petBtn.on('pointerdown', () => {
       AudioManager.playSfx('douglas_happy');
-      this.add.text(width / 2 - 160, height / 2 + 110, 'Good boy!', { fontSize: '18px', color: '#FFD23F' }).setOrigin(0.5);
-      this.time.delayedCall(800, () => this.scene.start('WorldMapScene'));
+      this.flashMessage('Good boy! 🐶');
+      onPetDouglas(this);
     });
 
     const treatBtn = this.add.rectangle(width / 2 + 160, height / 2 + 250, 160, 60, 0x32CD32).setInteractive({ useHandCursor: true });
@@ -55,8 +56,8 @@ export default class DouglasDenScene extends Phaser.Scene {
 
     treatBtn.on('pointerdown', () => {
       AudioManager.playSfx('douglas_bark');
-      this.add.text(width / 2 + 160, height / 2 + 110, 'Yummy!', { fontSize: '18px', color: '#FFD23F' }).setOrigin(0.5);
-      this.time.delayedCall(800, () => this.scene.start('WorldMapScene'));
+      this.flashMessage('Yummy! 🦴');
+      onTreatDouglas(this);
     });
 
     this.add.text(width / 2, height - 50, 'Douglas loves attention', {
@@ -65,5 +66,14 @@ export default class DouglasDenScene extends Phaser.Scene {
     }).setOrigin(0.5);
 
     addBackButton(this);
+  }
+
+  // Brief, self-clearing feedback above the buttons (so repeat taps don't pile up).
+  flashMessage(msg) {
+    const { width, height } = this.scale;
+    const t = this.add.text(width / 2, height / 2 + 120, msg, {
+      fontSize: '20px', color: '#FFD23F', fontStyle: 'bold'
+    }).setOrigin(0.5).setDepth(60);
+    this.tweens.add({ targets: t, alpha: 0, y: t.y - 24, delay: 600, duration: 400, onComplete: () => t.destroy() });
   }
 }

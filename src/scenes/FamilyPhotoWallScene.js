@@ -1,10 +1,11 @@
 import Phaser from 'phaser';
 import AudioManager from '../systems/AudioManager.js';
 import { FONT, makeHUD, makeDock, sceneBg, addBackButton } from '../ui/kit.js';
-import { S, photosUnlocked } from '../systems/state.js';
+import { S } from '../systems/state.js';
 import { SFX } from '../systems/audio.js';
 import { feel } from '../systems/feel.js';
 import { PHOTO_CAPS } from '../data/quests.js';
+import { photoUnlocked, countUnlockedPhotos } from '../systems/progression.js';
 
 const TOTAL = 11;
 
@@ -20,7 +21,7 @@ export default class FamilyPhotoWallScene extends Phaser.Scene {
     else this.add.rectangle(0, 0, W, H, 0x3E2723).setOrigin(0);
 
     this.add.text(W/2, 84, '📸 Family Photo Wall', { fontFamily: FONT, fontSize: '22px', color: '#FFE9C9', fontStyle: 'bold' }).setOrigin(0.5);
-    this.add.text(W/2, 112, photosUnlocked(TOTAL) + ' / ' + TOTAL + ' photos unlocked — tap one to see it big!', { fontFamily: FONT, fontSize: '14px', color: '#FFE9C9' }).setOrigin(0.5);
+    this.add.text(W/2, 112, countUnlockedPhotos(TOTAL) + ' / ' + TOTAL + ' photos unlocked — tap one to see it big!', { fontFamily: FONT, fontSize: '14px', color: '#FFE9C9' }).setOrigin(0.5);
 
     const cols = 6;
     const cw = 116;
@@ -32,7 +33,7 @@ export default class FamilyPhotoWallScene extends Phaser.Scene {
       const x = gx + (i%cols)*cw;
       const y = gy + Math.floor(i/cols)*ch;
       const bonus = i === TOTAL-1;
-      const unlocked = bonus ? S.kingdom : S.level >= i+1;
+      const unlocked = photoUnlocked(i, TOTAL);
 
       const fr = this.add.container(x, y).setAngle(Phaser.Math.Between(-3, 3));
 
@@ -67,7 +68,7 @@ export default class FamilyPhotoWallScene extends Phaser.Scene {
         });
       } else {
         fr.add(this.add.text(0, -10, '🔒', { fontSize: '36px' }).setOrigin(0.5));
-        fr.add(this.add.text(0, 42, bonus ? 'Unlock Kingdom!' : 'Reach Lv ' + (i + 1), {
+        fr.add(this.add.text(0, 42, bonus ? 'Unlock Kingdom!' : (i < 4 ? 'Play to unlock!' : 'Reach Lv ' + (i + 1)), {
           fontFamily: FONT, fontSize: '11px', color: '#888', fontStyle: 'bold', align: 'center'
         }).setOrigin(0.5));
       }

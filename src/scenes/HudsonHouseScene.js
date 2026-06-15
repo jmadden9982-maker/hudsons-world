@@ -3,6 +3,7 @@ import AudioManager from '../systems/AudioManager.js';
 import { FONT, addPremiumHud, addBottomDock, makeDouglasSprite } from '../ui/kit.js';
 import { S } from '../systems/state.js';
 import { feel } from '../systems/feel.js';
+import { onChestClaim } from '../systems/progression.js';
 
 export default class HudsonHouseScene extends Phaser.Scene {
   constructor() { super('HudsonHouseScene'); }
@@ -134,9 +135,9 @@ export default class HudsonHouseScene extends Phaser.Scene {
     }
     S.dailyRewardLastClaimed = today;
     S.stars = (S.stars || 0) + 25;
-    if (typeof persist === 'function') persist();
 
-    feel(this, 'reward', 'success');
+    feel(this, null, 'success'); // haptic only — progression plays the reward sound + persists
+    onChestClaim(this);          // +XP, first-time journal/photo, Treasure Hunter tracking
     const popup = this.add.text(this.scale.width / 2, 200, '🎁 +25 Stars!', {
       fontFamily: FONT,
       fontSize: '28px',
