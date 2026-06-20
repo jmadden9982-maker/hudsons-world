@@ -5,12 +5,12 @@ import { addBackButton, sceneBg, makeVectorHudson } from '../ui/kit.js';
 import { onOutfitEquip } from '../systems/progression.js';
 
 const OUTFITS = [
-  { id: 'everyday', name: 'Everyday',        emoji: '👕', unlocked: true,  color: 0x81D4FA },
-  { id: 'super',    name: 'Super Hudson',    emoji: '🦸', unlocked: true,  color: 0xFF5252 },
-  { id: 'pirate',   name: 'Pirate',          emoji: '🏴‍☠️', unlocked: true,  color: 0x5D4037 },
-  { id: 'dino',     name: 'Dino Explorer',   emoji: '🦖', unlocked: false, color: 0x4CAF50 },
-  { id: 'space',    name: 'Space Hudson',    emoji: '🚀', unlocked: false, color: 0x2196F3 },
-  { id: 'golden',   name: 'Golden Explorer', emoji: '👑', unlocked: false, color: 0xFFD700, legendary: true }
+  { id: 'everyday', name: 'Everyday',        emoji: '👕', unlocked: true,  color: 0x81D4FA, frame: 0 },
+  { id: 'super',    name: 'Super Hudson',    emoji: '🦸', unlocked: true,  color: 0xFF5252, frame: 1 },
+  { id: 'pirate',   name: 'Pirate',          emoji: '🏴‍☠️', unlocked: true,  color: 0x5D4037, frame: 2 },
+  { id: 'dino',     name: 'Dino Explorer',   emoji: '🦖', unlocked: false, color: 0x4CAF50, frame: 3 },
+  { id: 'space',    name: 'Space Hudson',    emoji: '🚀', unlocked: false, color: 0x2196F3, frame: 7 },
+  { id: 'golden',   name: 'Golden Explorer', emoji: '👑', unlocked: false, color: 0xFFD700, frame: 4, legendary: true }
 ];
 
 export default class WardrobeScene extends Phaser.Scene {
@@ -38,8 +38,15 @@ export default class WardrobeScene extends Phaser.Scene {
 
     this.currentOutfit = SaveSystem.getCurrentOutfit();
 
-    // Hudson preview: a clean code-drawn cartoon (no art asset needed); shirt recolours per outfit.
-    this.hudson = makeVectorHudson(this, width / 2, 268, 1.05);
+    // Hudson preview: real cartoon sprite with a distinct frame per outfit (true costumes) if the
+    // sheet loaded; otherwise the code-drawn vector Hudson (shirt recolour) as a safe fallback.
+    if (this.textures.exists('hudson_sheet')) {
+      this.hudson = this.add.sprite(width / 2, 268, 'hudson_sheet', 0).setScale(0.9);
+      this.hudsonIsSprite = true;
+    } else {
+      this.hudson = makeVectorHudson(this, width / 2, 268, 1.05);
+      this.hudsonIsSprite = false;
+    }
 
     // Outfit badge floating beside Hudson + the equipped-outfit name beneath him.
     this.outfitBadge = this.add.text(width / 2 + 92, 222, '', { fontSize: '40px' }).setOrigin(0.5);
@@ -96,7 +103,8 @@ export default class WardrobeScene extends Phaser.Scene {
     this.outfitLabel.setText(outfit.name);
     this.outfitBadge.setText(outfit.emoji);
 
-    if (this.hudson && this.hudson.setOutfit) this.hudson.setOutfit(outfit.color);
+    if (this.hudsonIsSprite) this.hudson.setFrame(outfit.frame || 0);
+    else if (this.hudson && this.hudson.setOutfit) this.hudson.setOutfit(outfit.color);
     else if (this.preview) this.preview.setFillStyle(outfit.color);
 
     Object.values(this.outfitCards).forEach(c => c.setStrokeStyle());
