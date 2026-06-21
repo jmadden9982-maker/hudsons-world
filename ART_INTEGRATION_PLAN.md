@@ -245,3 +245,46 @@ showed a `2 +-` text-line diff — the tell that a binary was committed as text.
 `claude/hudsons-world-apk-build-m4exvq`. The #86 build (`ebdd2a7`) already has
 portrait loading disabled with the emoji fallback, so the shipped APK never
 references these stubs. No rebuild required.
+
+### Portrait Audit Log — 2026-06-21 (in-repo files, branch `claude/hudsons-world-apk-build-m4exvq` @ `7ba80cd`)
+
+Independent re-audit of the six portrait PNGs actually present in the build branch
+working tree, against `ASSET_ACCEPTANCE_CRITERIA.md`.
+
+**Overall result: FAILED** (technical PASS, visual FAIL on all six)
+
+**Technical validation — PASS (all six):** valid 512×512 RGBA PNGs with real,
+non-zero image data (not stubs).
+
+| File | Dimensions | Size | SHA256 |
+|---|---|---|---|
+| hudson_portrait.png | 512×512 | 10391 B | `f499e298f2575702bf0d3f4a187a5b307131ed234508b249e32cc67538099d88` |
+| douglas_portrait.png | 512×512 | 11873 B | `b5e6c27eea333171edfefe100c3452b9e148fee506e8426c08b1d4d9befb05e5` |
+| james_portrait.png | 512×512 | 10446 B | `d6e0597f892d89c8e4ff348dbf125d5f48a98c38a88fcb9ff9c6bbdc24239d2a` |
+| aimee_portrait.png | 512×512 | 16380 B | `1f16daec95ccfabf62f034e562ca0e5b8fa125a4f0007a216e3f43a7d5fd530e` |
+| finley_portrait.png | 512×512 | 9161 B | `0c3623a4b0eb2ae4285990e87f5dee38cc03373075210a4372569f346b202f4d` |
+| babybell_portrait.png | 512×512 | 19878 B | `d26639c3cd2b26483f2166360ca9d2d428bdd664f6e0a4ca9de3975af4b462ec` |
+
+**Visual validation — FAIL (all six):**
+
+| File | Visual result | Verdict |
+|---|---|---|
+| hudson | Tofu missing-glyph box (□), baked-in name text | FAIL |
+| douglas | Tofu missing-glyph box (□), baked-in name text | FAIL |
+| james | Tofu missing-glyph box (□), baked-in name text | FAIL |
+| finley | Tofu missing-glyph box (□), baked-in name text | FAIL |
+| aimee | Generic outline-only smiley (no character identity), baked-in name text | FAIL |
+| babybell | Generic outline-only cat face (no character identity), baked-in name text | FAIL |
+
+Criteria violated: missing-glyph boxes (4 files); generic outline-only / no real
+illustrated face (aimee, babybell); **baked-in text — all six have the character
+name rendered into the image**, which the criteria explicitly forbids.
+
+**Decision:**
+- Do not integrate. Do not enable portrait loading.
+- Retain emoji-avatar fallback in Family Quests.
+- **Phase 1 (six real portraits) has NOT passed.** No downstream categories
+  (World Map, spritesheets, UI) unblock.
+
+**Action required:** Source six genuinely illustrated portrait PNGs (real faces, no
+baked-in text, character-accurate, on Hudson's World style) and re-run this audit.
