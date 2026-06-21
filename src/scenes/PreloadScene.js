@@ -32,7 +32,10 @@ export default class PreloadScene extends Phaser.Scene {
     UI.forEach((k) => this.load.image('ui_' + k, 'assets/ui/' + k + '.png'));
     // Character sheets     -> public/assets/spritesheets/<name>_spritesheet.png  (256x256 frames)
     this.load.spritesheet('douglas_sheet', 'assets/spritesheets/douglas_spritesheet.png', { frameWidth: 256, frameHeight: 256 });
-    this.load.spritesheet('hudson_sheet', 'assets/spritesheets/hudson_spritesheet.png', { frameWidth: 256, frameHeight: 256 });
+    // hudson_spritesheet.png failed visual audit (off-model toy-figure style, no per-outfit
+    // costume theming, frame 7 "space" duplicates frame 0 "everyday") — not loaded until a
+    // corrected pack lands. WardrobeScene falls back to the code-drawn vector Hudson.
+    // this.load.spritesheet('hudson_sheet', 'assets/spritesheets/hudson_spritesheet.png', { frameWidth: 256, frameHeight: 256 });
     // Portraits            -> public/assets/portraits/<name>_portrait.png  (key: portrait_<name>)
     ['hudson','douglas','babybell','finley','james','aimee'].forEach((n) => this.load.image('portrait_' + n, 'assets/portraits/' + n + '_portrait.png'));
     // SFX                  -> public/assets/audio/<key>.mp3
