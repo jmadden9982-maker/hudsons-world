@@ -12,6 +12,7 @@ import AdventureJournalScene from './scenes/AdventureJournalScene.js';
 import FamilyPhotoWallScene from './scenes/FamilyPhotoWallScene.js';
 import TrophyRoomScene from './scenes/TrophyRoomScene.js';
 import WardrobeScene from './scenes/WardrobeScene.js';
+import FamilyQuestScene from './scenes/FamilyQuestScene.js';
 import GameOverScene from './scenes/GameOverScene.js';
 
 const config = {
@@ -43,6 +44,7 @@ const config = {
     FamilyPhotoWallScene,
     TrophyRoomScene,
     WardrobeScene,
+    FamilyQuestScene,
     GameOverScene
   ]
 };

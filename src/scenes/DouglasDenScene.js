@@ -7,6 +7,7 @@ import {
   giftAvailable, claimDailyGift
 } from '../systems/pet.js';
 import { onPetDouglas, onTreatDouglas } from '../systems/progression.js';
+import { track } from '../systems/family.js';
 
 const BARS = [
   { key: 'happiness', emoji: '❤️', color: 0xE5455E },
@@ -92,6 +93,7 @@ export default class DouglasDenScene extends Phaser.Scene {
     // Keep the Phase-10F progression flow alive (Best Friend achievement, first-Douglas photo/journal).
     if (kind === 'pet') onPetDouglas(this);
     else if (kind === 'feed') onTreatDouglas(this);
+    track('care', 1); // any care action counts toward family quests
     // Douglas reacts with a little hop.
     this.tweens.add({ targets: this.douglas, y: this.douglasBaseY - 40, duration: 160, yoyo: true, ease: 'Quad.easeOut' });
     this.setBubble(r.line);

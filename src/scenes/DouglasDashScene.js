@@ -3,6 +3,7 @@ import AudioManager from '../systems/AudioManager.js';
 import SaveSystem from '../systems/SaveSystem.js';
 import { sceneBg, makeDouglasSprite, gameButton, COL, FONT } from '../ui/kit.js';
 import { onDashStart, onDashEnd } from '../systems/progression.js';
+import { track } from '../systems/family.js';
 
 // World themes reuse backgrounds already committed in public/assets/bg/.
 const WORLDS = [
@@ -30,6 +31,7 @@ export default class DouglasDashScene extends Phaser.Scene {
     this.worldIndex = 0;
 
     onDashStart(this); // first-play journal + photo
+    track('dash_play'); // family quest progress
 
     // Three lanes across the width; player runs at a fixed line near the bottom.
     this.lanes = [W * 0.22, W * 0.5, W * 0.78];
@@ -204,6 +206,7 @@ export default class DouglasDashScene extends Phaser.Scene {
             this.score += e.points;
             SaveSystem.addStars(e.points);
             AudioManager.playSfx(e.type === 'star' ? 'reward' : 'bone_collect');
+            track(e.type === 'star' ? 'star' : 'bones', 1);
             e.done = true; e.obj.destroy();
             continue;
           }

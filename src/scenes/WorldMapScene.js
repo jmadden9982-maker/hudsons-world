@@ -29,7 +29,8 @@ export default class WorldMapScene extends Phaser.Scene {
       { name: 'Journal', emoji: '📖', scene: 'AdventureJournalScene', x: 200, y: 540, color: 0x4B0082 },
       { name: 'Photo Wall', emoji: '📸', scene: 'FamilyPhotoWallScene', x: 520, y: 540, color: 0xFF6347 },
       { name: 'Trophy Room', emoji: '🏆', scene: 'TrophyRoomScene', x: 200, y: 700, color: 0xFFD700 },
-      { name: 'Wardrobe', emoji: '👕', scene: 'WardrobeScene', x: 520, y: 700, color: 0x9370DB }
+      { name: 'Wardrobe', emoji: '👕', scene: 'WardrobeScene', x: 520, y: 700, color: 0x9370DB },
+      { name: 'Family', emoji: '👨‍👩‍👧', scene: 'FamilyQuestScene', x: 360, y: 860, color: 0xE5728F }
     ];
 
     zones.forEach(zone => {

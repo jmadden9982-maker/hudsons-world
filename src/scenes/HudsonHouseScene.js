@@ -4,6 +4,7 @@ import { FONT, addPremiumHud, addBottomDock, makeDouglasSprite } from '../ui/kit
 import { S } from '../systems/state.js';
 import { feel } from '../systems/feel.js';
 import { onChestClaim } from '../systems/progression.js';
+import { track } from '../systems/family.js';
 
 export default class HudsonHouseScene extends Phaser.Scene {
   constructor() { super('HudsonHouseScene'); }
@@ -138,6 +139,7 @@ export default class HudsonHouseScene extends Phaser.Scene {
 
     feel(this, null, 'success'); // haptic only — progression plays the reward sound + persists
     onChestClaim(this);          // +XP, first-time journal/photo, Treasure Hunter tracking
+    track('chest', 1);           // family quest progress
     const popup = this.add.text(this.scale.width / 2, 200, '🎁 +25 Stars!', {
       fontFamily: FONT,
       fontSize: '28px',
