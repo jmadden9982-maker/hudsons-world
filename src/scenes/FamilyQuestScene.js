@@ -28,7 +28,9 @@ export default class FamilyQuestScene extends Phaser.Scene {
 
     this.cards = {};
     const quests = getQuests();
-    const top = 190, rowH = 232;
+    // First card starts below the instruction bubble (ends ~y120) so the member
+    // name doesn't clip into it; 4 cards still clear the back button (~y1140).
+    const top = 240, rowH = 232;
     quests.forEach((q, i) => this.buildCard(q, W / 2, top + i * rowH));
 
     addBackButton(this);
