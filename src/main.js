@@ -59,3 +59,18 @@ const config = {
 };
 
 window.game = new Phaser.Game(config);
+
+// Diagnostic: WebGL context loss is the prime suspect for the on-device freeze
+// (192MB of textures on a mobile GPU). Surface it on the error overlay if it fires.
+try {
+  const cv = window.game.canvas;
+  if (cv) {
+    cv.addEventListener('webglcontextlost', (e) => {
+      e.preventDefault();
+      window.__hwShowError && window.__hwShowError('WEBGL CONTEXT LOST — GPU/texture memory exhausted (this is the freeze).');
+    });
+    cv.addEventListener('webglcontextrestored', () => {
+      window.__hwShowError && window.__hwShowError('webgl context restored');
+    });
+  }
+} catch (e) {}
