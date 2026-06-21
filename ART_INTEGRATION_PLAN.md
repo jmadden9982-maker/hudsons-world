@@ -6,6 +6,19 @@
 **Target build:** APK #86
 **Status:** Audit complete — integration gated on the recommendations below.
 
+> **UPDATE 2026-06-21 — Reference Library Established.**
+> **STATUS:** Reference Library Established. Four verified reference images are
+> committed under `reference_library/` (see `reference_library/REFERENCE_LIBRARY_INDEX.md`).
+> These are a validated visual bible (real image files, character designs + art
+> style confirmed) — NOT game assets and NOT a portrait source.
+> **BLOCKER:** Dedicated character source renders required. The reference images are
+> composite sheets; per-character art is too small and carries baked-in labels, so it
+> cannot be cropped into production portraits (see `reference_library/CHARACTER_EXTRACTION_PLAN.md`).
+> **NEXT MILESTONE:** Create six individual high-resolution character renders
+> (Hudson, Douglas, Baby Bell, Finley, James, Aimée) suitable for portrait generation.
+> Portrait loading remains DISABLED; emoji fallback retained; no APK build pending.
+
+
 > Purpose: answer "what actually goes into the next build?" — not just "do the files
 > exist?" Every asset below was opened and inspected, not merely listed. Dimensions,
 > byte sizes, and end-of-image integrity markers were read directly from the files;
