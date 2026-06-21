@@ -177,3 +177,71 @@ build and contains zero broken assets.
 - Re-run this audit whenever a new art pack lands. Treat "the file exists" and
   "the file is shippable" as two separate checks — every incoming pack gets the
   full integrity + visual + better-than-current pass before integration.
+
+---
+
+## 6. Current Asset Status (as of 2026-06-21)
+
+| Asset | Status |
+|---|---|
+| Photos | ✅ Production-ready |
+| Backgrounds | ✅ Production-ready |
+| Douglas spritesheet | ✅ Production-ready |
+| Polaroid frame | ✅ Production-ready |
+| Family portraits | ❌ Missing (no valid PNGs in repo) |
+| Hudson spritesheet | ❌ Needs replacement |
+| World map art | ❌ Missing |
+
+**APK #87 objective (narrow, single-focus):**
+1. Obtain six real portrait PNGs.
+2. Audit them (this document's full integrity + visual pass).
+3. Re-enable portrait loading in `src/scenes/PreloadScene.js`.
+4. Build APK #87.
+
+Rationale: Family Quests is already live, so portraits are the highest-visibility
+missing asset in the game. Nothing else is in scope for #87.
+
+---
+
+## 7. Portrait Audit Log
+
+### Portrait Audit Log — 2026-06-21
+
+**Commit audited:** `724c71d5d703c4f37386f75db0fac7fb50a460f3`
+("Replace family portraits with production-ready versions", on `origin/main`)
+
+**Result:** FAILED
+
+**Summary:**
+All six portrait files committed in this change were discovered to be 18-byte
+ASCII text placeholders containing the literal string:
+
+> `Binary PNG 512x512`
+
+No valid PNG image data was present (no PNG signature, no IHDR, no pixel data; all
+six files byte-identical, MD5 `0c7c753a1c5f537cbc0eec7cab0e4658`). The associated
+report had claimed these were 512×512 transparent PNGs of 283–352 KB — that claim
+did not match the committed files. The commit existed; the described assets did not.
+
+**Files affected:**
+- `hudson_portrait.png`
+- `douglas_portrait.png`
+- `james_portrait.png`
+- `aimee_portrait.png`
+- `finley_portrait.png`
+- `babybell_portrait.png`
+
+**Decision:**
+- Do not integrate.
+- Do not enable portrait loading.
+- Retain emoji-avatar fallback in Family Quests.
+
+**Action required:**
+Replace all six portrait files with verified PNG binaries and re-run this audit
+before integration. (Detection tip: a real binary commit shows a `Bin` diff; these
+showed a `2 +-` text-line diff — the tell that a binary was committed as text.)
+
+**APK #86 impact:** None. Commit `724c71d` is on `main`, not on the build branch
+`claude/hudsons-world-apk-build-m4exvq`. The #86 build (`ebdd2a7`) already has
+portrait loading disabled with the emoji fallback, so the shipped APK never
+references these stubs. No rebuild required.
