@@ -16,6 +16,7 @@ import FamilyQuestScene from './scenes/FamilyQuestScene.js';
 import GamesHubScene from './scenes/GamesHubScene.js';
 import MemoryMatchScene from './scenes/MemoryMatchScene.js';
 import BoneHuntScene from './scenes/BoneHuntScene.js';
+import PhotoPuzzleScene from './scenes/PhotoPuzzleScene.js';
 import GameOverScene from './scenes/GameOverScene.js';
 
 const config = {
@@ -51,6 +52,7 @@ const config = {
     GamesHubScene,
     MemoryMatchScene,
     BoneHuntScene,
+    PhotoPuzzleScene,
     GameOverScene
   ]
 };

@@ -35,7 +35,7 @@ export default class GamesHubScene extends Phaser.Scene {
       { icon: '🃏', name: 'Memory Match', sub: 'Find the pairs',  scene: 'MemoryMatchScene', live: true, color: COL.purp },
       { icon: '🦴', name: 'Bone Hunt',    sub: 'Find the bones',  scene: 'BoneHuntScene',    live: true, color: COL.wood },
       { icon: '👕', name: 'Dress Up',     sub: 'Style Hudson',    scene: 'WardrobeScene',    live: true, color: COL.blue },
-      { icon: '🧩', name: 'Photo Puzzle', sub: 'Coming soon',     scene: null,               live: false, color: 0x8a7f70 }
+      { icon: '🧩', name: 'Photo Puzzle', sub: 'Solve the picture', scene: 'PhotoPuzzleScene', live: true, color: 0xE59A45 }
     ];
 
     const colX = [W / 2 - 168, W / 2 + 168];
