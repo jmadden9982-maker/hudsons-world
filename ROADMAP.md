@@ -4,6 +4,24 @@ Single source of truth for phase status. Detailed audits live in
 `ART_INTEGRATION_PLAN.md`; acceptance rules in `ASSET_ACCEPTANCE_CRITERIA.md`;
 verified reference art in `reference_library/`.
 
+---
+
+## ⭐ CURRENT STABLE BUILD — known-good rollback checkpoint
+
+| | |
+|---|---|
+| **APK** | #93 |
+| **Commit** | `ec44b35` |
+| **Branch** | `claude/hudsons-world-apk-build-m4exvq` |
+| **SHA256** | `b0013ce4275ec9f79f1b3ce297948e1c8197b885e60cc47ff34c610ca7a7b799` |
+| **Portraits** | Complete (verified on-device) |
+| **Family Quests** | Complete (spacing fixed, verified on-device) |
+| **Status** | **STABLE BASELINE** |
+
+If future work breaks the build, roll back to `ec44b35`.
+
+---
+
 ## The proven pipeline (reuse for every art category)
 
 ```
@@ -50,19 +68,21 @@ what's new vs. a refresh:
 Required new art classes: zone marker/card frames, and any net-new zone
 backgrounds (Douglas Forest, Winter Village, Dragon Peaks).
 
-### Later phases (not started)
-- Douglas Dash asset packs (parallax layers, themed obstacles, run/jump spritesheet)
-- Wardrobe outfits (true per-outfit costumes)
-- Character spritesheets (mood/action — needs 2048px source renders)
-- Trophy room artwork
-- Quest artwork
-- UI refresh
+**Suggested delivery in 3 packs** (integrate + test each without risking the stable build):
+- **Pack 1 — Backgrounds:** main world map + the 9 zones (Hudson Town, Douglas Forest,
+  Pirate Island, Dino Valley, Space Station, Pumpkin Patch, Winter Village, Dragon Peaks,
+  Adventure Kingdom).
+- **Pack 2 — Markers & overlays:** locked / unlocked / completed / selected markers,
+  path segments, sparkle effects, cloud overlays.
+- **Pack 3 — Motion & audio:** travel animations, unlock animations, region-completion
+  animations, world-map sound effects.
 
----
+### Later phases (not started) — priority order
+1. 🌍 World Map overhaul (Phase 2, above) — biggest visual gain per hour
+2. 🎮 Douglas Dash improvements (parallax layers, themed obstacles, run/jump spritesheet)
+3. 👕 Wardrobe / outfit system (true per-outfit costumes)
+4. 🏆 Trophy room visuals
+5. 📖 Journal & Photo Wall refresh
+6. ✨ UI polish pass
 
-## Current build
-- **Stable baseline:** APK #93 (commit `ec44b35`) — portraits integrated, Family Quest
-  spacing fixed, build green, confirmed on-device. SHA256
-  `b0013ce4275ec9f79f1b3ce297948e1c8197b885e60cc47ff34c610ca7a7b799`.
-- Branch: `claude/hudsons-world-apk-build-m4exvq`.
-- Locked: Portraits, Family Quests. Do not modify unless a genuine bug is found.
+(Character spritesheets for mood/action need the 2048px source renders noted under Portraits.)
