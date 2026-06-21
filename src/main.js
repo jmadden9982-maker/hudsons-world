@@ -12,6 +12,11 @@ import AdventureJournalScene from './scenes/AdventureJournalScene.js';
 import FamilyPhotoWallScene from './scenes/FamilyPhotoWallScene.js';
 import TrophyRoomScene from './scenes/TrophyRoomScene.js';
 import WardrobeScene from './scenes/WardrobeScene.js';
+import FamilyQuestScene from './scenes/FamilyQuestScene.js';
+import GamesHubScene from './scenes/GamesHubScene.js';
+import MemoryMatchScene from './scenes/MemoryMatchScene.js';
+import BoneHuntScene from './scenes/BoneHuntScene.js';
+import PhotoPuzzleScene from './scenes/PhotoPuzzleScene.js';
 import GameOverScene from './scenes/GameOverScene.js';
 
 const config = {
@@ -43,6 +48,11 @@ const config = {
     FamilyPhotoWallScene,
     TrophyRoomScene,
     WardrobeScene,
+    FamilyQuestScene,
+    GamesHubScene,
+    MemoryMatchScene,
+    BoneHuntScene,
+    PhotoPuzzleScene,
     GameOverScene
   ]
 };

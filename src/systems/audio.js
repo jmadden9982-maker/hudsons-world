@@ -1,4 +1,4 @@
-import { AudioManager } from './AudioManager.js';
+import AudioManager from './AudioManager.js';
 
 export const SFX = {
   tap() {

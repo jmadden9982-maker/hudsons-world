@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import AudioManager from '../systems/AudioManager.js';
 import { FONT, makeHUD, makeDock, sceneBg, addBackButton } from '../ui/kit.js';
 import { S } from '../systems/state.js';
 import { SFX } from '../systems/audio.js';
@@ -8,10 +9,17 @@ export default class AdventureJournalScene extends Phaser.Scene {
   constructor() { super('AdventureJournalScene'); }
 
   create() {
+    AudioManager.setScene(this);
     const { width:W, height:H } = this.scale;
 
     sceneBg(this, 'bg_journal', 0xFBEAD0, 0xE6CBA6);
-    this.add.text(W/2, 56, '📖 The Adventures of Hudson', { fontFamily: FONT, fontSize: '26px', color: '#7a4a00', fontStyle: 'bold' }).setOrigin(0.5);
+    // Stronger scrim so entries read clearly over the painted cover.
+    this.add.rectangle(0, 0, W, H, 0xFBEAD0, 0.58).setOrigin(0).setDepth(-50);
+    // The painted journal cover already carries a title — only add one in the flat fallback,
+    // and keep it small so it doesn't compete with the artwork.
+    if (!this.textures.exists('bg_journal')) {
+      this.add.text(W/2, 86, '📖 The Adventures of Hudson', { fontFamily: FONT, fontSize: '18px', color: '#7a4a00', fontStyle: 'bold' }).setOrigin(0.5);
+    }
 
     const entries = S.journal.slice(0, 40);
     if (!entries.length) {
@@ -19,7 +27,7 @@ export default class AdventureJournalScene extends Phaser.Scene {
     }
 
     const view = this.add.container(0, 0);
-    let y = 92;
+    let y = 132;
     entries.forEach(e => {
       const card = this.add.container(W/2, y);
       const gold = /GOLDEN|Kingdom/i.test(e.title);

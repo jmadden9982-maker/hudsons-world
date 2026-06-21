@@ -3,8 +3,8 @@ const AudioManager = {
   music: null,
   currentMusicKey: null,
 
-  musicVolume: 0.7,
-  sfxVolume: 0.85,
+  musicVolume: 0.3,
+  sfxVolume: 0.7,
   muted: false,
 
   init(scene) {
@@ -22,20 +22,22 @@ const AudioManager = {
   // === MUSIC ===
   playMusic(key) {
     if (!this.scene || this.muted || !key) return;
-
     if (this.currentMusicKey === key && this.music && this.music.isPlaying) return;
 
-    this.stopMusic();
-
     try {
-      if (this.scene.sound.get(key)) {
-        this.music = this.scene.sound.add(key, {
-          loop: true,
-          volume: this.musicVolume
-        });
-        this.music.play();
-        this.currentMusicKey = key;
+      const sm = this.scene.sound;
+      // Mobile autoplay restriction: defer until the first user interaction unlocks audio.
+      if (sm.locked) {
+        sm.once('unlocked', () => this.playMusic(key));
+        return;
       }
+      // Optional track: if the file was never committed, keep whatever is playing (stay silent).
+      if (!sm.get(key)) return;
+
+      this.stopMusic();
+      this.music = sm.add(key, { loop: true, volume: this.musicVolume });
+      this.music.play();
+      this.currentMusicKey = key;
     } catch (e) {}
   },
 

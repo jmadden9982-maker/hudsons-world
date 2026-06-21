@@ -1,6 +1,17 @@
 import Phaser from 'phaser';
 import AudioManager from '../systems/AudioManager.js';
 import SaveSystem from '../systems/SaveSystem.js';
+import { addBackButton, sceneBg, makeVectorHudson } from '../ui/kit.js';
+import { onOutfitEquip } from '../systems/progression.js';
+
+const OUTFITS = [
+  { id: 'everyday', name: 'Everyday',        emoji: '👕', unlocked: true,  color: 0x81D4FA, frame: 0 },
+  { id: 'super',    name: 'Super Hudson',    emoji: '🦸', unlocked: true,  color: 0xFF5252, frame: 1 },
+  { id: 'pirate',   name: 'Pirate',          emoji: '🏴‍☠️', unlocked: true,  color: 0x5D4037, frame: 2 },
+  { id: 'dino',     name: 'Dino Explorer',   emoji: '🦖', unlocked: false, color: 0x4CAF50, frame: 3 },
+  { id: 'space',    name: 'Space Hudson',    emoji: '🚀', unlocked: false, color: 0x2196F3, frame: 7 },
+  { id: 'golden',   name: 'Golden Explorer', emoji: '👑', unlocked: false, color: 0xFFD700, frame: 4, legendary: true }
+];
 
 export default class WardrobeScene extends Phaser.Scene {
   constructor() {
@@ -9,40 +20,43 @@ export default class WardrobeScene extends Phaser.Scene {
 
   create() {
     AudioManager.setScene(this);
+    AudioManager.playMusic('music_playful');
 
     const { width, height } = this.scale;
 
-    this.add.rectangle(0, 0, width, height, 0xEADFFB).setOrigin(0);
-
-    this.add.text(width / 2, 50, 'Wardrobe', {
-      fontSize: '36px',
-      color: '#4A148C',
-      fontStyle: 'bold'
-    }).setOrigin(0.5);
+    if (this.textures.exists('bg_wardrobe')) {
+      sceneBg(this, 'bg_wardrobe', 0xEADFFB, 0xD7C3F5);
+      // Soft scrim so cards/text stay legible over the painted art.
+      this.add.rectangle(0, 0, width, height, 0xEADFFB, 0.32).setOrigin(0).setDepth(-50);
+    } else {
+      this.add.rectangle(0, 0, width, height, 0xEADFFB).setOrigin(0);
+      // Only show a scene title in the fallback; the painted background already says "Wardrobe".
+      this.add.text(width / 2, 50, 'Wardrobe', {
+        fontSize: '36px', color: '#4A148C', fontStyle: 'bold'
+      }).setOrigin(0.5);
+    }
 
     this.currentOutfit = SaveSystem.getCurrentOutfit();
 
-    this.preview = this.add.rectangle(width / 2, 280, 140, 180, 0xFFCC80);
-    this.hudsonEmoji = this.add.text(width / 2, 280, '👦', { fontSize: '80px' }).setOrigin(0.5);
+    // Hudson preview: real cartoon sprite with a distinct frame per outfit (true costumes) if the
+    // sheet loaded; otherwise the code-drawn vector Hudson (shirt recolour) as a safe fallback.
+    if (this.textures.exists('hudson_sheet')) {
+      this.hudson = this.add.sprite(width / 2, 268, 'hudson_sheet', 0).setScale(0.9);
+      this.hudsonIsSprite = true;
+    } else {
+      this.hudson = makeVectorHudson(this, width / 2, 268, 1.05);
+      this.hudsonIsSprite = false;
+    }
 
-    this.outfitLabel = this.add.text(width / 2, 400, this.getOutfitName(this.currentOutfit), {
-      fontSize: '22px',
-      color: '#4A148C',
-      fontStyle: 'bold'
+    // Outfit badge floating beside Hudson + the equipped-outfit name beneath him.
+    this.outfitBadge = this.add.text(width / 2 + 92, 222, '', { fontSize: '40px' }).setOrigin(0.5);
+    this.outfitLabel = this.add.text(width / 2, 400, '', {
+      fontSize: '22px', color: '#4A148C', fontStyle: 'bold'
     }).setOrigin(0.5);
 
-    const outfits = [
-      { id: 'everyday', name: 'Everyday', emoji: '👕', unlocked: true, color: 0x81D4FA, special: false },
-      { id: 'super', name: 'Super Hudson', emoji: '🦸', unlocked: true, color: 0xFF5252, special: true },
-      { id: 'pirate', name: 'Pirate', emoji: '🏴‍☠️', unlocked: true, color: 0x5D4037, special: true },
-      { id: 'dino', name: 'Dino Explorer', emoji: '🦖', unlocked: false, color: 0x4CAF50, special: true },
-      { id: 'space', name: 'Space Hudson', emoji: '🚀', unlocked: false, color: 0x2196F3, special: true },
-      { id: 'golden', name: 'Golden Explorer', emoji: '👑', unlocked: false, color: 0xFFD700, special: true, legendary: true }
-    ];
-
+    // Outfit selection grid.
     this.outfitCards = {};
-
-    outfits.forEach((outfit, i) => {
+    OUTFITS.forEach((outfit, i) => {
       const col = i % 3;
       const row = Math.floor(i / 3);
       const x = 140 + col * 220;
@@ -68,14 +82,48 @@ export default class WardrobeScene extends Phaser.Scene {
       });
     });
 
-    if (this.outfitCards[this.currentOutfit]) {
-      this.outfitCards[this.currentOutfit].setStrokeStyle(4, 0xFFD700);
-    }
+    // Apply whatever outfit is currently saved (fall back to the first unlocked one).
+    const current = OUTFITS.find(o => o.id === this.currentOutfit && o.unlocked) || OUTFITS[0];
+    this.applyOutfitVisual(current);
 
     this.add.text(width / 2, height - 45, 'Tap an outfit to equip', {
-      fontSize: '18px', color: '#4A148C' }).setOrigin(0.5);
+      fontSize: '18px', color: '#4A148C'
+    }).setOrigin(0.5);
+
+    addBackButton(this);
   }
 
-  getOutfitName(id) { /* ... */ }
-  equipOutfit(outfit, card) { /* ... existing logic with AudioManager already called above ... */ }
+  getOutfitName(id) {
+    const o = OUTFITS.find(x => x.id === id);
+    return o ? o.name : 'Everyday';
+  }
+
+  // Update the preview (tint/colour, badge, name) and the selected-card highlight.
+  applyOutfitVisual(outfit) {
+    this.outfitLabel.setText(outfit.name);
+    this.outfitBadge.setText(outfit.emoji);
+
+    if (this.hudsonIsSprite) this.hudson.setFrame(outfit.frame || 0);
+    else if (this.hudson && this.hudson.setOutfit) this.hudson.setOutfit(outfit.color);
+    else if (this.preview) this.preview.setFillStyle(outfit.color);
+
+    Object.values(this.outfitCards).forEach(c => c.setStrokeStyle());
+    const sel = this.outfitCards[outfit.id];
+    if (sel) sel.setStrokeStyle(4, 0xFFD700);
+  }
+
+  equipOutfit(outfit, card) {
+    this.currentOutfit = outfit.id;
+    SaveSystem.setCurrentOutfit(outfit.id);
+    this.applyOutfitVisual(outfit);
+
+    // Little pop so the change reads as an action.
+    const target = this.hudson || this.preview;
+    if (target) {
+      this.tweens.add({ targets: target, scaleX: target.scaleX * 1.08, scaleY: target.scaleY * 1.08, duration: 110, yoyo: true });
+    }
+
+    // Progression: reward the first time each distinct outfit is tried.
+    onOutfitEquip(this, outfit.id);
+  }
 }

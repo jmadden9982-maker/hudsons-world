@@ -1,12 +1,18 @@
 import Phaser from 'phaser';
-import { FONT, addPremiumHud, addBottomDock } from '../ui/kit.js';
+import AudioManager from '../systems/AudioManager.js';
+import { FONT, addPremiumHud, addBottomDock, makeDouglasSprite } from '../ui/kit.js';
 import { S } from '../systems/state.js';
 import { feel } from '../systems/feel.js';
+import { onChestClaim } from '../systems/progression.js';
+import { track } from '../systems/family.js';
 
 export default class HudsonHouseScene extends Phaser.Scene {
   constructor() { super('HudsonHouseScene'); }
 
   create() {
+    AudioManager.setScene(this);
+    AudioManager.playMusic('music_calm');
+
     const { width: W, height: H } = this.scale;
 
     // Painted background (with fallback)
@@ -24,9 +30,9 @@ export default class HudsonHouseScene extends Phaser.Scene {
     addPremiumHud(this);
     addBottomDock(this, 'HudsonHouseScene');
 
-    this.add.text(W / 2, 56, '🏡 Hudson House', {
+    this.add.text(W / 2, 86, '🏡 Hudson House', {
       fontFamily: FONT,
-      fontSize: '28px',
+      fontSize: '26px',
       color: '#7a4a00',
       fontStyle: 'bold'
     }).setOrigin(0.5);
@@ -96,9 +102,17 @@ export default class HudsonHouseScene extends Phaser.Scene {
       });
     });
 
-    // Douglas (fixed - no wrong exit to Main Menu)
-    const douglas = this.add.rectangle(W - 120, H - 120, 80, 60, 0x8B4513).setInteractive({ useHandCursor: true });
-    this.add.text(W - 120, H - 120, '🐕 Douglas', { fontSize: '16px', color: '#fff' }).setOrigin(0.5);
+    // Douglas (real sprite if loaded, else the small placeholder). Kept above the
+    // bottom dock (dock occupies the lower 64px) and tappable to visit his den.
+    let douglas = makeDouglasSprite(this, W - 110, H - 150, 'douglas_idle');
+    if (douglas) {
+      douglas.setScale(0.52);
+      this.tweens.add({ targets: douglas, y: douglas.y - 8, duration: 1000, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+    } else {
+      douglas = this.add.rectangle(W - 120, H - 120, 80, 60, 0x8B4513);
+      this.add.text(W - 120, H - 120, '🐕 Douglas', { fontSize: '16px', color: '#fff' }).setOrigin(0.5);
+    }
+    douglas.setInteractive({ useHandCursor: true });
     douglas.on('pointerdown', () => {
       feel(this, 'douglas_happy', 'soft');
       this.add.text(W - 120, H - 160, 'Douglas is happy!', { fontSize: '16px', color: '#FFD23F' }).setOrigin(0.5);
@@ -122,9 +136,10 @@ export default class HudsonHouseScene extends Phaser.Scene {
     }
     S.dailyRewardLastClaimed = today;
     S.stars = (S.stars || 0) + 25;
-    if (typeof persist === 'function') persist();
 
-    feel(this, 'chest_open', 'success');
+    feel(this, null, 'success'); // haptic only — progression plays the reward sound + persists
+    onChestClaim(this);          // +XP, first-time journal/photo, Treasure Hunter tracking
+    track('chest', 1);           // family quest progress
     const popup = this.add.text(this.scale.width / 2, 200, '🎁 +25 Stars!', {
       fontFamily: FONT,
       fontSize: '28px',
