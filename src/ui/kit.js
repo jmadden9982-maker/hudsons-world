@@ -27,17 +27,11 @@ export function bg(scene, top = 0x7EC8F2, bot = 0xFFF1DA) {
 // Re-entrancy guard: rapid/repeated taps must not fire overlapping scene.start()
 // calls (the #94 unresponsiveness). Disables input + fades, then starts once.
 export function gotoScene(scene, key, data) {
-  if (scene._navigating) return;
+  if (scene._navigating) return;       // ignore overlapping/rapid taps
   scene._navigating = true;
   try { scene.input.enabled = false; } catch (e) {}
   console.log('[nav] ->', key);
-  const cam = scene.cameras && scene.cameras.main;
-  if (cam) {
-    cam.fadeOut(180);
-    cam.once('camerafadeoutcomplete', () => scene.scene.start(key, data));
-  } else {
-    scene.scene.start(key, data);
-  }
+  scene.scene.start(key, data);        // no camera fade: avoids black-screen on reused-instance re-entry
 }
 
 // Call once in a scene's create(): logs start/shutdown, resets the nav guard for
@@ -45,6 +39,8 @@ export function gotoScene(scene, key, data) {
 export function installSceneLifecycle(scene, name) {
   scene._navigating = false;
   try { scene.input.enabled = true; } catch (e) {}
+  // Belt-and-suspenders: clear any leftover camera FX on (re)entry of a reused instance.
+  try { const cam = scene.cameras && scene.cameras.main; if (cam) cam.resetFX(); } catch (e) {}
   console.log('[scene] start:', name);
   scene.events.once('shutdown', () => {
     console.log('[scene] shutdown:', name);

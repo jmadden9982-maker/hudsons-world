@@ -1,3 +1,4 @@
+import './systems/errorOverlay.js'; // first: catch errors before anything else inits
 import Phaser from 'phaser';
 
 // Import scenes that exist
@@ -57,4 +58,4 @@ const config = {
   ]
 };
 
-new Phaser.Game(config);
+window.game = new Phaser.Game(config);
