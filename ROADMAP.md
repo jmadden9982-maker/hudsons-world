@@ -20,6 +20,12 @@ verified reference art in `reference_library/`.
 
 If future work breaks the build, roll back to `ec44b35`.
 
+> **APK #94 — NOT promoted. Failed phone test.** Two problems: (1) app becomes
+> unresponsive after repeated map navigation, (2) every world link is a Douglas Dash
+> re-skin — the map promises distinct adventures the gameplay doesn't deliver.
+> New direction: full world-game overhaul. Phase A stability fix + architecture
+> proposal in `WORLD_GAMES_ARCHITECTURE.md`. #93 remains the rollback target.
+
 ---
 
 ## The proven pipeline (reuse for every art category)

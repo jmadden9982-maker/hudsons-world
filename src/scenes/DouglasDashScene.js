@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import AudioManager from '../systems/AudioManager.js';
 import SaveSystem from '../systems/SaveSystem.js';
-import { sceneBg, makeDouglasSprite, gameButton, COL, FONT } from '../ui/kit.js';
+import { sceneBg, makeDouglasSprite, gameButton, COL, FONT, gotoScene, installSceneLifecycle } from '../ui/kit.js';
 import { onDashStart, onDashEnd } from '../systems/progression.js';
 import { track } from '../systems/family.js';
 
@@ -26,6 +26,7 @@ export default class DouglasDashScene extends Phaser.Scene {
 
   create() {
     AudioManager.setScene(this);
+    installSceneLifecycle(this, 'DouglasDashScene');
     const { width: W, height: H } = this.scale;
 
     this.score = 0;
@@ -78,7 +79,7 @@ export default class DouglasDashScene extends Phaser.Scene {
     this.setupInput();
 
     // Back button (top-right, clear of play).
-    gameButton(this, W - 86, 44, 132, 52, '⬅ Back', COL.wood, () => this.scene.start('WorldMapScene')).setDepth(130);
+    gameButton(this, W - 86, 44, 132, 52, '⬅ Back', COL.wood, () => gotoScene(this, 'WorldMapScene')).setDepth(130);
 
     this.spawnTimer = this.time.addEvent({ delay: 950, callback: this.spawnRow, callbackScope: this, loop: true });
   }
@@ -185,7 +186,7 @@ export default class DouglasDashScene extends Phaser.Scene {
     const best = SaveSystem.setHighScore(this.score);
     this.bestText.setText('Best: ' + best);
     onDashEnd(this, this.score);
-    this.time.delayedCall(900, () => this.scene.start('GameOverScene', { score: this.score }));
+    this.time.delayedCall(900, () => gotoScene(this, 'GameOverScene', { score: this.score }));
   }
 
   update(time, delta) {

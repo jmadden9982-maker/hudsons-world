@@ -23,6 +23,38 @@ export function bg(scene, top = 0x7EC8F2, bot = 0xFFF1DA) {
   return g.setDepth(-100);
 }
 
+// --- Safe scene navigation + lifecycle (stability) -------------------------
+// Re-entrancy guard: rapid/repeated taps must not fire overlapping scene.start()
+// calls (the #94 unresponsiveness). Disables input + fades, then starts once.
+export function gotoScene(scene, key, data) {
+  if (scene._navigating) return;
+  scene._navigating = true;
+  try { scene.input.enabled = false; } catch (e) {}
+  console.log('[nav] ->', key);
+  const cam = scene.cameras && scene.cameras.main;
+  if (cam) {
+    cam.fadeOut(180);
+    cam.once('camerafadeoutcomplete', () => scene.scene.start(key, data));
+  } else {
+    scene.scene.start(key, data);
+  }
+}
+
+// Call once in a scene's create(): logs start/shutdown, resets the nav guard for
+// the reused scene instance, and defensively frees tweens/timers/input on shutdown.
+export function installSceneLifecycle(scene, name) {
+  scene._navigating = false;
+  try { scene.input.enabled = true; } catch (e) {}
+  console.log('[scene] start:', name);
+  scene.events.once('shutdown', () => {
+    console.log('[scene] shutdown:', name);
+    try { scene.tweens.killAll(); } catch (e) {}
+    try { scene.time.removeAllEvents(); } catch (e) {}
+    try { scene.input.removeAllListeners(); } catch (e) {}
+    try { if (scene.input.keyboard) scene.input.keyboard.removeAllListeners(); } catch (e) {}
+  });
+}
+
 // Painted-background slot: draws the texture cover-style if it was loaded, else a themed gradient.
 export function sceneBg(scene, key, top = 0x7EC8F2, bot = 0xFFF1DA) {
   const { width: W, height: H } = scene.scale;
@@ -155,12 +187,12 @@ export function makeDock(scene, activeKey) {
 
 export function backButton(scene, onTap) {
   const { height: H } = scene.scale;
-  return gameButton(scene, 100, H - 110, 160, 60, '⬅ Back', COL.wood, onTap || (() => scene.scene.start('WorldMapScene'))).setDepth(120);
+  return gameButton(scene, 100, H - 110, 160, 60, '⬅ Back', COL.wood, onTap || (() => gotoScene(scene, 'WorldMapScene'))).setDepth(120);
 }
 
 // Compatibility aliases used by some scenes — real implementations, not stubs.
 export function addBackButton(scene, targetScene = 'WorldMapScene') {
-  return backButton(scene, () => scene.scene.start(targetScene));
+  return backButton(scene, () => gotoScene(scene, targetScene));
 }
 export function addBottomDock(scene, activeKey = '') { return makeDock(scene, activeKey); }
 export function addPremiumHud(scene) { return makeHUD(scene); }

@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import AudioManager from '../systems/AudioManager.js';
-import { sceneBg, FONT, toast } from '../ui/kit.js';
+import { sceneBg, FONT, toast, gotoScene, installSceneLifecycle } from '../ui/kit.js';
 import { grantReward } from '../systems/progression.js';
 import { track } from '../systems/family.js';
 import SaveSystem from '../systems/SaveSystem.js';
@@ -37,6 +37,7 @@ export default class WorldMapScene extends Phaser.Scene {
   create() {
     AudioManager.setScene(this);
     AudioManager.playMusic('music_calm');
+    installSceneLifecycle(this, 'WorldMapScene');
     const { width: W, height: H } = this.scale;
 
     // Illustrated map background (falls back to the old flat map, then plain colour).
@@ -80,8 +81,7 @@ export default class WorldMapScene extends Phaser.Scene {
       }
       AudioManager.playSfx('button_confirm');
       this.tweens.add({ targets: ring, scale: 1.35, alpha: 0, duration: 220, ease: 'Quad.easeOut' });
-      this.tweens.add({ targets: hit, scale: 0.9, duration: 90, yoyo: true,
-        onComplete: () => this.scene.start(loc.scene, loc.data || undefined) });
+      gotoScene(this, loc.scene, loc.data || undefined);
     });
   }
 
@@ -102,8 +102,7 @@ export default class WorldMapScene extends Phaser.Scene {
       const hit = this.add.rectangle(cx, barY, slot - 4, barH - 8, 0xffffff, 0.001).setInteractive({ useHandCursor: true }).setDepth(62);
       hit.on('pointerdown', () => {
         AudioManager.playSfx('button_confirm');
-        this.tweens.add({ targets: hit, scaleX: 0.9, scaleY: 0.9, duration: 80, yoyo: true,
-          onComplete: () => this.scene.start(b.scene) });
+        gotoScene(this, b.scene);
       });
     });
   }
