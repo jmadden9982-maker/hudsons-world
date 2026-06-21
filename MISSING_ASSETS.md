@@ -1,5 +1,11 @@
 # Hudson's World — Assets that MUST be committed
 
+> **Before integrating any asset, see [`ASSET_ACCEPTANCE_CRITERIA.md`](./ASSET_ACCEPTANCE_CRITERIA.md)**
+> for the required technical + visual validation gate, and `ART_INTEGRATION_PLAN.md`
+> for the standing asset status and audit log. "The file exists" and "the file is
+> shippable" are two separate checks — open every asset and verify it before wiring.
+
+
 The build is green, but the repo contains **no art or audio**. Every file below is
 referenced by the code and loaded by `PreloadScene`. All loads are error-tolerant and
 all scene usage is guarded, so missing files never crash — they just fall back to flat
@@ -32,6 +38,11 @@ phase-10 wiring step. Baby Bell & Finley sheets still need creating as transpare
 ## 5. Portraits — public/assets/portraits/   (transparent .png)
 hudson_portrait.png, douglas_portrait.png, babybell_portrait.png,
 finley_portrait.png, james_portrait.png, aimee_portrait.png   (for dialogue, phase 10)
+STATUS (2026-06-21): BLOCKED — no valid portrait PNGs exist. The committed files
+are broken (tofu/outline renders) and the attempted replacement (commit 724c71d)
+was 18-byte text stubs. Portrait loading is disabled in PreloadScene; Family Quests
+uses emoji avatars. Six real PNGs must pass ASSET_ACCEPTANCE_CRITERIA.md before
+loading is re-enabled (APK #87 milestone).
 
 ## 6. Audio — public/assets/audio/   (.mp3)
 button_click, button_confirm, coin_pickup, bone_pickup, bone_collect, reward,
