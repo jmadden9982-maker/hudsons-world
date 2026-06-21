@@ -288,3 +288,34 @@ name rendered into the image**, which the criteria explicitly forbids.
 
 **Action required:** Source six genuinely illustrated portrait PNGs (real faces, no
 baked-in text, character-accurate, on Hudson's World style) and re-run this audit.
+
+### Portrait Audit Log — 2026-06-21 (commit `8f2a7d0`)
+
+Audit of commit `8f2a7d0d24b2555eab98c6cf270378509c63fc9e` ("Replace portraits with
+verified illustrated faces", on `origin/main`), against `ASSET_ACCEPTANCE_CRITERIA.md`.
+
+**Result: FAILED**
+
+**Technical validation — FAIL at first check.** All six files are **10-byte ASCII
+text stubs** containing the literal string `Binary PNG`. Not valid PNGs (no
+signature), no dimensions, no pixel data. All six byte-identical, SHA256
+`6034a7a91b6900af2f8dd9d6037211e0fb2bd01f998cb2d1d62fdb68e9b03a35`.
+
+**Visual validation — N/A** (no image to open).
+
+This is the **second** "verified" portrait commit that proved to be stubs:
+- `724c71d` → 18-byte `Binary PNG 512x512` stubs.
+- `8f2a7d0` → 10-byte `Binary PNG` stubs.
+
+Both diffs showed `2 +-` text-line changes rather than a `Bin` binary diff — the
+reliable tell that no real binary was committed. The "verified illustrated faces"
+commit message did not match the committed content.
+
+**Decision:**
+- Do not integrate. Do not enable portrait loading.
+- Retain emoji-avatar fallback in Family Quests.
+- **Phase 1 remains OPEN.** No downstream categories unblock.
+
+**Action required:** Commit six real PNG binaries. Verify before claiming success:
+`file <name>` must report `PNG image data` (not `ASCII text`), and `git show --stat`
+must show a `Bin` diff (not `2 +-`). Then re-run this audit.
