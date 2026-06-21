@@ -21,9 +21,9 @@ trusted without independent verification.
 ### PORTRAITS — ✅ COMPLETE (APK #87)
 - Six real 512×512 RGBA portraits, audited PASS, integrated.
 - Portrait loading re-enabled; Family Quests uses real portraits (emoji fallback no longer triggers).
-- Commit `6a73160`; build run #92 success.
+- Commit `6a73160`; build run #92 success. Family Quest card-spacing fix in `ec44b35` (build #93).
 - **FROZEN** — do not modify unless fixing a bug.
-- **Final manual check (owner):** install APK #87, open Family Quests, confirm portraits render as expected. Once confirmed, Portrait V1 is genuinely done.
+- **Owner on-device check: ✅ CONFIRMED (2026-06-21)** — Family Quests renders correctly, portraits visible, no overlap. Portrait V1 genuinely done.
 - Scope: V1 approved for small UI/avatar use only. Dedicated 2048px transparent per-character source renders still required later (spritesheets, animation, wardrobe, large UI/marketing) — see `reference_library/CHARACTER_EXTRACTION_PLAN.md`.
 
 ### PHASE 2 — WORLD MAP ART — ⏳ PENDING reference art
@@ -61,5 +61,8 @@ backgrounds (Douglas Forest, Winter Village, Dragon Peaks).
 ---
 
 ## Current build
-- **Stable:** APK #87 (commit `6a73160`), portraits integrated, build green.
+- **Stable baseline:** APK #93 (commit `ec44b35`) — portraits integrated, Family Quest
+  spacing fixed, build green, confirmed on-device. SHA256
+  `b0013ce4275ec9f79f1b3ce297948e1c8197b885e60cc47ff34c610ca7a7b799`.
 - Branch: `claude/hudsons-world-apk-build-m4exvq`.
+- Locked: Portraits, Family Quests. Do not modify unless a genuine bug is found.
