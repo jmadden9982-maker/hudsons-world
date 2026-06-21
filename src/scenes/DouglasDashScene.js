@@ -18,6 +18,12 @@ const WORLDS = [
 export default class DouglasDashScene extends Phaser.Scene {
   constructor() { super('DouglasDashScene'); }
 
+  // Optional { world } from the World Map lets a themed location start at its theme.
+  init(data) {
+    const n = data && Number.isInteger(data.world) ? data.world : 0;
+    this.startWorld = Math.max(0, Math.min(WORLDS.length - 1, n));
+  }
+
   create() {
     AudioManager.setScene(this);
     const { width: W, height: H } = this.scale;
@@ -28,7 +34,7 @@ export default class DouglasDashScene extends Phaser.Scene {
     this.jumping = false;
     this.sliding = false;
     this.entities = [];
-    this.worldIndex = 0;
+    this.worldIndex = this.startWorld || 0;
 
     onDashStart(this); // first-play journal + photo
     track('dash_play'); // family quest progress
@@ -39,8 +45,8 @@ export default class DouglasDashScene extends Phaser.Scene {
     this.playerBaseY = H - 300;
 
     // Background + ground (themed per world).
-    this.groundRect = this.add.rectangle(0, H - 90, W, 90, WORLDS[0].ground).setOrigin(0).setDepth(-90);
-    this.setWorld(0);
+    this.groundRect = this.add.rectangle(0, H - 90, W, 90, WORLDS[this.worldIndex].ground).setOrigin(0).setDepth(-90);
+    this.setWorld(this.worldIndex);
 
     // Faint lane dividers so the three lanes read clearly.
     const div = this.add.graphics().setDepth(-80);
@@ -192,7 +198,7 @@ export default class DouglasDashScene extends Phaser.Scene {
     const speed = 330 + Math.min(420, this.elapsed * 16);
     this.score += speed * dt * 0.02;
     this.scoreText.setText('Score: ' + Math.floor(this.score));
-    const targetWorld = Math.min(WORLDS.length - 1, Math.floor(this.score / 150));
+    const targetWorld = Math.min(WORLDS.length - 1, (this.startWorld || 0) + Math.floor(this.score / 150));
     if (targetWorld !== this.worldIndex) this.setWorld(targetWorld);
 
     const py = this.playerBaseY;

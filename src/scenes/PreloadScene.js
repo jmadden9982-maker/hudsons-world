@@ -3,7 +3,7 @@ import Phaser from 'phaser';
 // Canonical asset slots for the full game. Files live under public/assets/.
 // Everything is optional at runtime: scenes guard with textures.exists()/sound.get(),
 // so any not-yet-committed file simply falls back — it never blocks startup.
-const BG = ['mainmenu','worldmap','town','house','den','wardrobe','quests','critters',
+const BG = ['mainmenu','worldmap','worldmap_full','town','house','den','wardrobe','quests','critters',
   'photowall','journal','trophies','dash','pirate','dino','space','pumpkin','kingdom','gameover'];
 const PHOTOS = 11;
 const UI = ['polaroid_frame','trophy_gold','trophy_silver','trophy_bronze','button_large','panel','card'];
