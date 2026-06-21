@@ -44,9 +44,13 @@ trusted without independent verification.
 - **Owner on-device check: ✅ CONFIRMED (2026-06-21)** — Family Quests renders correctly, portraits visible, no overlap. Portrait V1 genuinely done.
 - Scope: V1 approved for small UI/avatar use only. Dedicated 2048px transparent per-character source renders still required later (spritesheets, animation, wardrobe, large UI/marketing) — see `reference_library/CHARACTER_EXTRACTION_PLAN.md`.
 
-### PHASE 2 — WORLD MAP ART — ⏳ PENDING reference art
-Highest-value visual upgrade next. **Blocked** until reference art is delivered
-and verified (same gate as portraits). The World Map is currently code-drawn.
+### PHASE 2 — WORLD MAP ART — 🟡 REFERENCE VERIFIED, awaiting production assets
+Highest-value visual upgrade next. The World Map is currently code-drawn.
+**Reference received & verified (2026-06-21):** `reference_library/world_map_reference_sheet.png`
+(VERIFIED_REFERENCE) — high-quality composite covering all Phase 2 deliverables, but
+REFERENCE-ONLY: elements are too small to extract (full map ~190px vs needed 720×1280).
+**Blocked on dedicated high-res production assets** — see
+`reference_library/WORLD_MAP_EXTRACTION_PLAN.md` for the exact files/specs needed.
 
 Proposed zone deliverables, mapped against existing background assets so we know
 what's new vs. a refresh:
