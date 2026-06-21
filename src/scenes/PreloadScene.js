@@ -37,12 +37,10 @@ export default class PreloadScene extends Phaser.Scene {
     // corrected pack lands. WardrobeScene falls back to the code-drawn vector Hudson.
     // this.load.spritesheet('hudson_sheet', 'assets/spritesheets/hudson_spritesheet.png', { frameWidth: 256, frameHeight: 256 });
     // Portraits            -> public/assets/portraits/<name>_portrait.png  (key: portrait_<name>)
-    // Disabled for APK #86 (safe scope): 4 of 6 portraits render a tofu missing-glyph
-    // box instead of a face (hudson/douglas/james/finley), and aimee/babybell are only
-    // generic outlines — all failed the art audit. With these not loaded, FamilyQuestScene
-    // falls back to its emoji avatars (👨/👩/🧒/🐱), which look better than the broken art.
-    // Re-enable once a corrected portrait pack lands (see ART_INTEGRATION_PLAN.md, #87+).
-    // ['hudson','douglas','babybell','finley','james','aimee'].forEach((n) => this.load.image('portrait_' + n, 'assets/portraits/' + n + '_portrait.png'));
+    // Portrait V1 (APK #87): real 512x512 RGBA portraits, extracted from the verified
+    // character pack and audited PASS (see ART_INTEGRATION_PLAN.md). Re-enabled; Family
+    // Quests now shows real portraits instead of the emoji fallback.
+    ['hudson','douglas','babybell','finley','james','aimee'].forEach((n) => this.load.image('portrait_' + n, 'assets/portraits/' + n + '_portrait.png'));
     // SFX                  -> public/assets/audio/<key>.mp3
     SFX_KEYS.forEach((k) => this.load.audio(k, 'assets/audio/' + k + '.mp3'));
     // Looping music (optional)  -> public/assets/audio/<key>.mp3  (stays silent until committed)

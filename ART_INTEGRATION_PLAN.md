@@ -6,17 +6,36 @@
 **Target build:** APK #86
 **Status:** Audit complete — integration gated on the recommendations below.
 
-> **UPDATE 2026-06-21 — Reference Library Established.**
-> **STATUS:** Reference Library Established. Four verified reference images are
-> committed under `reference_library/` (see `reference_library/REFERENCE_LIBRARY_INDEX.md`).
-> These are a validated visual bible (real image files, character designs + art
-> style confirmed) — NOT game assets and NOT a portrait source.
-> **BLOCKER:** Dedicated character source renders required. The reference images are
-> composite sheets; per-character art is too small and carries baked-in labels, so it
-> cannot be cropped into production portraits (see `reference_library/CHARACTER_EXTRACTION_PLAN.md`).
-> **NEXT MILESTONE:** Create six individual high-resolution character renders
-> (Hudson, Douglas, Baby Bell, Finley, James, Aimée) suitable for portrait generation.
-> Portrait loading remains DISABLED; emoji fallback retained; no APK build pending.
+> **UPDATE 2026-06-21 — Portrait V1 integrated (APK #87).**
+> **STATUS:** Six real portraits PASS audit, integrated, portrait loading RE-ENABLED.
+> Family Quests now uses real portraits instead of the emoji fallback.
+> Source: extracted from a verified character pack (single high-quality composite,
+> near-white bg keyed to real transparency), framed into the circular-badge style.
+> **SCOPE LIMIT:** Portrait V1 approved for small UI/avatar use only. Dedicated 2048px
+> transparent per-character source renders are still required for spritesheets,
+> animations, wardrobe, and larger UI/marketing assets (see `reference_library/CHARACTER_EXTRACTION_PLAN.md`).
+> **PRIOR STATE (for history):** Reference Library Established (`reference_library/`,
+> commit `3766982`); portraits were blocked pending real source art.
+
+### Portrait Audit Log — 2026-06-21 (Portrait V1, APK #87) — PASS
+
+Six portraits built from the verified character pack and audited against
+`ASSET_ACCEPTANCE_CRITERIA.md`. **Result: PASS (all six).**
+
+Technical: valid 512×512 RGBA PNGs, real transparency (corner alpha 0), 125–180 KB.
+Visual: real illustrated faces, character-accurate, consistent badge style, no
+text/tofu/emoji. Humans framed head-and-shoulders; Douglas/Baby Bell full-body.
+
+| File | Dimensions | Size | SHA256 (first 32) |
+|---|---|---|---|
+| hudson_portrait.png | 512×512 | 170530 B | `3d36129aa6d1e1d8daea898071cc66fc` |
+| douglas_portrait.png | 512×512 | 145604 B | `399a3d3016240ad0a81cc767e9e08300` |
+| james_portrait.png | 512×512 | 167826 B | `34ed5dd3bdddba014361949decdff7e2` |
+| aimee_portrait.png | 512×512 | 179726 B | `eb0dc6fdf02e19db44ee1816421587b7` |
+| finley_portrait.png | 512×512 | 156538 B | `d8121a1f5bc8b24b2e238c12eeb8a557` |
+| babybell_portrait.png | 512×512 | 124997 B | `d4a66b72f586e48e661b3ffa82497bb4` |
+
+Decision: integrated. Portrait loading re-enabled in `src/scenes/PreloadScene.js`.
 
 
 > Purpose: answer "what actually goes into the next build?" — not just "do the files
