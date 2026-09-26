@@ -1,9 +1,8 @@
 import Phaser from 'phaser';
 import { S } from '../systems/state.js';
-import { button, COLORS, roundedPanel, textStyle, topBar } from '../ui/kit.js';
+import { button, celebrateAt, COLORS, floatingTextAt, milestoneBurstAt, roundedPanel, textStyle, topBar } from '../ui/kit.js';
 import AudioManager from '../systems/AudioManager.js';
 import Narrator from '../systems/Narrator.js';
-import { isMilestone } from '../systems/gameplay.js';
 
 export default class AdventureBase extends Phaser.Scene {
   constructor(key) { super(key); this.finished = false; this.started = false; }
@@ -36,17 +35,11 @@ export default class AdventureBase extends Phaser.Scene {
   }
 
   floatingText(x, y, label, color = '#ffffff') {
-    const t = this.add.text(x, y, label, textStyle(23, color, { fontStyle: 'bold', stroke: '#211b3c', strokeThickness: 5 })).setOrigin(0.5).setDepth(60);
-    this.tweens.add({ targets: t, y: y - 65, alpha: 0, duration: 650, onComplete: () => t.destroy() });
+    return floatingTextAt(this, x, y, label, color);
   }
 
   celebrate(x, y, color = 0xffd447) {
-    if (S.settings.calm) return;
-    for (let i = 0; i < 12; i += 1) {
-      const angle = (Math.PI * 2 * i) / 12; const distance = Phaser.Math.Between(45, 95);
-      const spark = this.add.circle(x, y, Phaser.Math.Between(3, 7), i % 3 === 0 ? 0xffffff : color, 0.95).setDepth(59);
-      this.tweens.add({ targets: spark, x: x + Math.cos(angle) * distance, y: y + Math.sin(angle) * distance, scale: 0.15, alpha: 0, duration: 430, ease: 'Quad.easeOut', onComplete: () => spark.destroy() });
-    }
+    celebrateAt(this, x, y, color);
   }
 
   impact(intensity = 0.006) {
@@ -56,11 +49,6 @@ export default class AdventureBase extends Phaser.Scene {
   // Extra flourish every 5th streak/combo: a bigger burst, a camera flash and an
   // "on fire" callout, on top of whatever per-pickup feedback the scene already shows.
   milestoneBurst(x, y, count, color = 0xffd447) {
-    if (!isMilestone(count)) return;
-    this.floatingText(x, y - 60, '🔥 ON FIRE!', color);
-    if (!S.settings.calm) {
-      this.celebrate(x, y, color);
-      this.cameras.main.flash(160, 255, 212, 71, false);
-    }
+    milestoneBurstAt(this, x, y, count, color);
   }
 }

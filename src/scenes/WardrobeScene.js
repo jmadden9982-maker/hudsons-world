@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { S, persist } from '../systems/state.js';
-import { COLORS, paintBackground, roundedPanel, textStyle, toast, topBar } from '../ui/kit.js';
+import { celebrateAt, COLORS, paintBackground, roundedPanel, textStyle, toast, topBar } from '../ui/kit.js';
 import { createActor } from '../systems/CharacterActor.js';
 
 const outfits = [
@@ -29,7 +29,7 @@ export default class WardrobeScene extends Phaser.Scene {
       this.add.text(x - 95, y, open ? outfit.icon : '🔒', textStyle(44)).setOrigin(0.5);
       this.add.text(x + 25, y - 15, outfit.name, textStyle(16, open ? COLORS.ink : '#e5dfea', { fontStyle: 'bold', wordWrap: { width: 180 }, align: 'center' })).setOrigin(0.5);
       this.add.text(x + 25, y + 30, S.outfit === outfit.id ? 'WEARING' : open ? 'TAP TO WEAR' : 'Adventure reward', textStyle(12, open ? '#6c4ccf' : '#e5dfea', { fontStyle: 'bold' })).setOrigin(0.5);
-      if (open) this.add.zone(x, y, 310, 140).setInteractive({ useHandCursor: true }).on('pointerdown', () => { S.outfit = outfit.id; persist(); this.hudsonActor.playState('celebrate'); toast(this, `${outfit.icon} ${outfit.name} equipped!`, outfit.color); this.time.delayedCall(500, () => this.scene.restart()); });
+      if (open) this.add.zone(x, y, 310, 140).setInteractive({ useHandCursor: true }).on('pointerdown', () => { S.outfit = outfit.id; persist(); this.hudsonActor.playState('celebrate'); celebrateAt(this, W / 2 - 150, 250, outfit.color); toast(this, `${outfit.icon} ${outfit.name} equipped!`, outfit.color); this.time.delayedCall(500, () => this.scene.restart()); });
     });
   }
 }

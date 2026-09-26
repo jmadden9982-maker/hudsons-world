@@ -1,10 +1,12 @@
 import Phaser from 'phaser';
 import { careForDouglas, S } from '../systems/state.js';
-import { button, COLORS, paintBackground, progressBar, roundedPanel, textStyle, toast, topBar } from '../ui/kit.js';
+import { button, celebrateAt, COLORS, milestoneBurstAt, paintBackground, progressBar, roundedPanel, textStyle, toast, topBar } from '../ui/kit.js';
 import AudioManager from '../systems/AudioManager.js';
 import { DOUGLAS_ABILITIES, DOUGLAS_SKINS } from '../data/collections.js';
 import { persist } from '../systems/state.js';
 import { createActor } from '../systems/CharacterActor.js';
+
+const CARE_COUNTER = { pet: 'pets', treat: 'treats', play: 'games' };
 
 export default class DouglasDenScene extends Phaser.Scene {
   constructor() { super('DouglasDenScene'); }
@@ -26,7 +28,13 @@ export default class DouglasDenScene extends Phaser.Scene {
     this.add.text(W / 2, 1010, 'Douglas never gets sad while you are away.', textStyle(16, '#ffffff')).setOrigin(0.5);
   }
   moodLine() { return S.douglas.joy >= 100 ? 'BEST FRIENDS FOREVER!' : S.douglas.joy >= 80 ? 'Douglas is delighted!' : 'Douglas is ready to play!'; }
-  care(action, message) { careForDouglas(action); AudioManager.playSfx('douglas_happy'); this.douglasActor.playState('celebrate'); toast(this, message, 0x9b683d, 1100); this.time.delayedCall(600, () => this.scene.restart()); }
+  care(action, message) {
+    careForDouglas(action); AudioManager.playSfx('douglas_happy'); this.douglasActor.playState('celebrate');
+    const { width: W } = this.scale;
+    celebrateAt(this, W / 2, 210, 0x9b683d);
+    milestoneBurstAt(this, W / 2, 210, S.douglas[CARE_COUNTER[action]], 0x9b683d);
+    toast(this, message, 0x9b683d, 1100); this.time.delayedCall(600, () => this.scene.restart());
+  }
   showSkins() {
     const { width: W, height: H } = this.scale; const ov = this.add.container(0, 0).setDepth(150);
     ov.add(this.add.rectangle(W / 2, H / 2, W, H, 0x171126, 0.86).setInteractive());

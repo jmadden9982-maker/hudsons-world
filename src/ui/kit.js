@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { S, campaignBadges, persist, titleForLevel, totalZoneStars, xpNeed } from '../systems/state.js';
 import AudioManager from '../systems/AudioManager.js';
 import { HapticManager } from '../systems/HapticManager.js';
+import { isMilestone } from '../systems/gameplay.js';
 
 export const FONT = 'Trebuchet MS, Arial, sans-serif';
 export const COLORS = { ink: '#2a2140', cream: '#fff8e8', yellow: '#ffd447', purple: '#6c4ccf', green: '#40a95b', blue: '#47a8e8', coral: '#f36f5f', brown: '#6b4325' };
@@ -67,6 +68,33 @@ export function ambientMotes(scene, options = {}) {
     scene.tweens.add({ targets: mote, y: mote.y - Phaser.Math.Between(35, 95), x: mote.x + Phaser.Math.Between(-25, 25), alpha: 0.05, duration: 2600 + i * 170, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
     return mote;
   });
+}
+
+// Shared "juice" primitives usable by any scene, not just AdventureBase subclasses
+// (hub screens like Douglas Den and the Wardrobe want the same feedback without
+// taking on AdventureBase's adventure-timer/tutorial-overlay lifecycle).
+export function celebrateAt(scene, x, y, color = 0xffd447) {
+  if (S.settings.calm) return;
+  for (let i = 0; i < 12; i += 1) {
+    const angle = (Math.PI * 2 * i) / 12; const distance = Phaser.Math.Between(45, 95);
+    const spark = scene.add.circle(x, y, Phaser.Math.Between(3, 7), i % 3 === 0 ? 0xffffff : color, 0.95).setDepth(59);
+    scene.tweens.add({ targets: spark, x: x + Math.cos(angle) * distance, y: y + Math.sin(angle) * distance, scale: 0.15, alpha: 0, duration: 430, ease: 'Quad.easeOut', onComplete: () => spark.destroy() });
+  }
+}
+
+export function floatingTextAt(scene, x, y, label, color = '#ffffff') {
+  const t = scene.add.text(x, y, label, textStyle(23, color, { fontStyle: 'bold', stroke: '#211b3c', strokeThickness: 5 })).setOrigin(0.5).setDepth(60);
+  scene.tweens.add({ targets: t, y: y - 65, alpha: 0, duration: 650, onComplete: () => t.destroy() });
+  return t;
+}
+
+export function milestoneBurstAt(scene, x, y, count, color = 0xffd447) {
+  if (!isMilestone(count)) return;
+  floatingTextAt(scene, x, y - 60, '🔥 ON FIRE!', color);
+  if (!S.settings.calm) {
+    celebrateAt(scene, x, y, color);
+    scene.cameras.main.flash(160, 255, 212, 71, false);
+  }
 }
 
 export function roundedPanel(scene, x, y, width, height, color = 0xffffff, alpha = 0.96, stroke = 0x46376e) {
