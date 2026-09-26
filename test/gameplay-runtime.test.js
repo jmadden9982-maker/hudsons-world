@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { chaosBatchSize, eggMatches, isMilestone, isRainbowRound, nearestDestination, nearbyTreasureCount, smoothDelta, withinRadius } from '../src/systems/gameplay.js';
+import { chaosBatchSize, eggMatches, isMilestone, isRainbowRound, nearestDestination, nearbyTreasureCount, pickBonusIndex, smoothDelta, withinRadius } from '../src/systems/gameplay.js';
 
 test('lag spikes are capped so moving objects cannot jump across the playfield', () => {
   assert.equal(smoothDelta(16.67), 16.67);
@@ -48,6 +48,13 @@ test('Finley Chaos never doubles up before the unlock round or on the last toy',
   assert.equal(chaosBatchSize(4, 4, true), 2);
   assert.equal(chaosBatchSize(4, 4, false), 1);
   assert.equal(chaosBatchSize(7, 1, true), 1);
+});
+
+test('a bonus index always lands outside the excluded set, across the full roll range', () => {
+  const excluded = new Set([0, 1, 2, 3, 4]);
+  assert.equal(pickBonusIndex(excluded, 16, 0), 5);
+  assert.equal(pickBonusIndex(excluded, 16, 0.999), 15);
+  for (let roll = 0; roll < 1; roll += 0.05) assert.ok(!excluded.has(pickBonusIndex(excluded, 16, roll)));
 });
 
 test('streak milestones fire only on every 5th, never on zero', () => {

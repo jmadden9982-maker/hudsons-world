@@ -45,3 +45,12 @@ export function chaosBatchSize(tidied, remaining, rollDual, unlockAt = 4) {
   if (tidied < unlockAt || remaining <= 1) return 1;
   return rollDual ? 2 : 1;
 }
+
+// Picks a bonus grid index outside a set of already-reserved ones (e.g. Pirate
+// Dig's Lucky Chest, kept separate from the five required treasures) from a
+// caller-supplied roll in [0, 1), so it's deterministic and testable.
+export function pickBonusIndex(excludeIndexes, gridSize, roll) {
+  const available = [];
+  for (let i = 0; i < gridSize; i += 1) if (!excludeIndexes.has(i)) available.push(i);
+  return available[Math.min(available.length - 1, Math.floor(roll * available.length))];
+}
