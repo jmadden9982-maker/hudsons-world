@@ -1,1 +1,0 @@
-See generated manifest in artifacts

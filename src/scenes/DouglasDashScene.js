@@ -1,97 +1,88 @@
 import Phaser from 'phaser';
+import AdventureBase from './AdventureBase.js';
+import { S, recordAdventure } from '../systems/state.js';
+import { ambientMotes, button, COLORS, premiumBackdrop, queuePremiumBackdrop, showAdventureResult, textStyle } from '../ui/kit.js';
 import AudioManager from '../systems/AudioManager.js';
-import SaveSystem from '../systems/SaveSystem.js';
+import { DOUGLAS_SKINS } from '../data/collections.js';
+import { smoothDelta } from '../systems/gameplay.js';
 
-export default class DouglasDashScene extends Phaser.Scene {
-  constructor() {
-    super('DouglasDashScene');
-  }
-
+export default class DouglasDashScene extends AdventureBase {
+  constructor() { super('DouglasDashScene'); }
+  preload() { queuePremiumBackdrop(this, 'premium-forest', 'assets/premium/forest-run.png'); }
   create() {
-    AudioManager.setScene(this);
-
     const { width: W, height: H } = this.scale;
-
-    this.score = 0;
-    this.isGameOver = false;
-
-    this.add.rectangle(0, 0, W, H, 0x87CEEB).setOrigin(0);
-    this.ground = this.add.rectangle(0, H - 60, W, 60, 0x228B22).setOrigin(0);
-    this.physics.add.existing(this.ground, true);
-
-    this.doug = this.add.rectangle(140, H - 130, 48, 60, 0x8B4513);
-    this.physics.add.existing(this.doug);
-    this.doug.body.setCollideWorldBounds(true);
-    this.physics.add.collider(this.doug, this.ground);
-
-    this.scoreText = this.add.text(30, 30, 'Score: 0', { fontSize: '28px', color: '#ffffff', fontStyle: 'bold' });
-    this.highScoreText = this.add.text(30, 70, 'Best: ' + SaveSystem.getHighScore(), { fontSize: '20px', color: '#FFD23F' });
-
-    this.input.on('pointerdown', () => this.jump());
-
-    this.obstacles = this.physics.add.group();
-    this.collectibles = this.physics.add.group();
-
-    this.time.addEvent({ delay: 1400, callback: this.spawnObstacle, callbackScope: this, loop: true });
-    this.time.addEvent({ delay: 1100, callback: this.spawnCollectible, callbackScope: this, loop: true });
-
-    this.physics.add.overlap(this.doug, this.collectibles, this.collectItem, null, this);
-    this.physics.add.overlap(this.doug, this.obstacles, this.hitObstacle, null, this);
-
-    this.physics.world.gravity.y = 1100;
-  }
-
-  jump() {
-    if (this.doug.body.touching.down && !this.isGameOver) {
-      this.doug.body.setVelocityY(-620);
-    }
-  }
-
-  spawnObstacle() {
-    if (this.isGameOver) return;
-    const ob = this.add.rectangle(this.scale.width + 40, this.scale.height - 95, 38, 38, 0x8B0000);
-    this.physics.add.existing(ob);
-    ob.body.setVelocityX(-260);
-    ob.body.setAllowGravity(false);
-    this.obstacles.add(ob);
-  }
-
-  spawnCollectible() {
-    if (this.isGameOver) return;
-    const item = this.add.circle(this.scale.width + 30, this.scale.height - 130, 14, 0x8B4513);
-    this.physics.add.existing(item);
-    item.body.setVelocityX(-240);
-    item.body.setAllowGravity(false);
-    item.setData('points', 10);
-    this.collectibles.add(item);
-  }
-
-  collectItem(doug, item) {
-    const points = item.getData('points') || 10;
-    this.score += points;
-    this.scoreText.setText('Score: ' + this.score);
-    item.destroy();
-
-    SaveSystem.addStars(points);
-    AudioManager.playSfx('bone_collect');
-  }
-
-  hitObstacle() {
-    if (this.isGameOver) return;
-    this.isGameOver = true;
-    this.physics.pause();
-
-    const newHigh = SaveSystem.setHighScore(this.score);
-    this.highScoreText.setText('Best: ' + newHigh);
-
-    this.time.delayedCall(600, () => {
-      this.scene.start('GameOverScene', { score: this.score });
+    this.lanes = [190, 360, 530]; this.lane = 1; this.distance = 0; this.bones = 0; this.streak = 0; this.bestStreak = 0; this.hearts = 3; this.objects = []; this.invulnerable = false; this.jumping = false;
+    premiumBackdrop(this, 'premium-forest', { shade: 0.08, drift: false, transient: true }); ambientMotes(this, { count: 16, color: 0xffe793, depth: -1 });
+    [275, 445].forEach((x) => this.add.rectangle(x, 720, 4, 860, 0xfff0bd, 0.22).setDepth(-1));
+    this.hudText = this.add.text(28, 108, '🏃 0m   🦴 0   ❤️❤️❤️', textStyle(21, '#ffffff', { fontStyle: 'bold', backgroundColor: '#211b3c', padding: { x: 12, y: 8 } })).setDepth(40);
+    this.playerShadow = this.add.ellipse(this.lanes[this.lane], 1015, 110, 32, 0x090612, 0.38);
+    const douglasLook = DOUGLAS_SKINS.find((skin) => skin.id === S.douglas.skin) || DOUGLAS_SKINS[0];
+    this.player = this.add.text(this.lanes[this.lane], 965, douglasLook.icon, textStyle(72, '#ffffff', { stroke: '#ffffff', strokeThickness: 3 })).setOrigin(0.5).setDepth(15);
+    this.add.text(W / 2, 1165, 'Swipe or use the big buttons', textStyle(16, '#ffffff', { fontStyle: 'bold' })).setOrigin(0.5).setDepth(20);
+    button(this, 120, 1100, '‹', () => this.changeLane(-1), { width: 150, height: 82, color: 0x6c4ccf, fontSize: 44, depth: 25 });
+    button(this, 360, 1100, '↑ JUMP', () => this.jump(), { width: 200, height: 82, color: 0x47a8e8, fontSize: 23, depth: 25 });
+    button(this, 600, 1100, '›', () => this.changeLane(1), { width: 150, height: 82, color: 0x6c4ccf, fontSize: 44, depth: 25 });
+    this.input.keyboard?.on('keydown-LEFT', () => this.changeLane(-1));
+    this.input.keyboard?.on('keydown-RIGHT', () => this.changeLane(1));
+    this.input.keyboard?.on('keydown-UP', () => this.jump());
+    let startX = 0; let startY = 0;
+    this.input.on('pointerdown', (p) => { startX = p.x; startY = p.y; });
+    this.input.on('pointerup', (p) => {
+      const dx = p.x - startX; const dy = p.y - startY;
+      if (Math.abs(dy) > 55 && dy < 0) this.jump(); else if (Math.abs(dx) > 50) this.changeLane(dx > 0 ? 1 : -1);
     });
+    this.begin('DOUGLAS DASH', 'Race down the three-lane temple trail. Swipe left or right to dodge logs. Swipe up to jump. Collect bones for Douglas!', '🐶');
   }
-
-  update() {
-    if (this.isGameOver) return;
-    this.obstacles.children.iterate(ob => { if (ob && ob.x < -50) ob.destroy(); });
-    this.collectibles.children.iterate(item => { if (item && item.x < -30) item.destroy(); });
+  onAdventureStart() {
+    this.lastTime = this.time.now;
+    this.spawnObstacleEvent = this.time.addEvent({ delay: S.settings.calm ? 1350 : 1000, loop: true, callback: () => this.spawn('obstacle') });
+    this.spawnBoneEvent = this.time.addEvent({ delay: Math.max(520, 720 - (S.douglas.level - 1) * 45), loop: true, callback: () => this.spawn('bone') });
+    this.makeTimer(S.settings.calm ? 42 : 36, () => this.finish());
+  }
+  changeLane(direction) {
+    if (!this.started || this.finished) return;
+    this.lane = Phaser.Math.Clamp(this.lane + direction, 0, 2);
+    this.tweens.add({ targets: [this.player, this.playerShadow], x: this.lanes[this.lane], duration: S.settings.calm ? 180 : 120, ease: 'Sine.easeOut' });
+  }
+  jump() {
+    if (!this.started || this.finished || this.jumping) return;
+    this.jumping = true; AudioManager.playSfx('button_confirm');
+    this.tweens.add({ targets: this.player, y: 820, duration: 300, yoyo: true, ease: 'Sine.easeOut', onComplete: () => { this.jumping = false; } });
+    this.tweens.add({ targets: this.playerShadow, scaleX: 0.55, alpha: 0.1, duration: 300, yoyo: true });
+  }
+  spawn(type) {
+    if (!this.started || this.finished) return;
+    const lane = Phaser.Math.Between(0, 2); const icon = type === 'bone' ? '🦴' : Phaser.Utils.Array.GetRandom(['🪵', '🪨']);
+    const object = this.add.text(this.lanes[lane], 170, icon, textStyle(type === 'bone' ? 43 : 58)).setOrigin(0.5).setDepth(10);
+    object.setData({ lane, type, hit: false }); this.objects.push(object);
+  }
+  update(time, delta) {
+    if (!this.started || this.finished) return;
+    delta = smoothDelta(delta);
+    const speed = (S.settings.calm ? 0.27 : 0.34) + Math.min(S.settings.calm ? 0.05 : 0.11, this.distance / 9000); this.distance += delta * 0.033;
+    this.objects = this.objects.filter((object) => {
+      if (!object.active) return false;
+      object.y += delta * speed; object.setScale(0.7 + object.y / 1800);
+      if (!object.getData('hit') && object.y > 875 && object.y < 1035 && object.getData('lane') === this.lane) {
+        object.setData('hit', true);
+        if (object.getData('type') === 'bone') {
+          this.bones += 1; this.streak += 1; this.bestStreak = Math.max(this.bestStreak, this.streak); AudioManager.playSfx('bone_collect'); this.floatingText(object.x, object.y, this.streak > 1 ? `BONE STREAK ×${this.streak}` : '+1 BONE', COLORS.yellow); this.celebrate(object.x, object.y, 0xffd447); object.destroy();
+        } else if (!this.jumping && !this.invulnerable) {
+          this.hearts -= 1; this.streak = 0; this.invulnerable = true; AudioManager.playSfx('bump'); this.floatingText(object.x, object.y, 'BOUNCE!', '#ffdf7a'); this.impact(); object.destroy();
+          this.player.setAlpha(0.4); this.time.delayedCall(900, () => { this.invulnerable = false; this.player.setAlpha(1); });
+          if (this.hearts <= 0) { this.finish(true); return false; }
+        }
+      }
+      if (object.y > 1200) { object.destroy(); return false; }
+      return true;
+    });
+    this.hudText.setText(`🏃 ${Math.round(this.distance)}m   🦴 ${this.bones} ×${this.streak}   ${'❤️'.repeat(this.hearts)}${'🤍'.repeat(3 - this.hearts)}`);
+  }
+  finish(neededBreather = false) {
+    if (this.finished) return; this.finished = true; this.spawnObstacleEvent?.remove(); this.spawnBoneEvent?.remove(); this.timerEvent?.remove();
+    const score = Math.round(this.distance + this.bones * 35 + this.bestStreak * 20); const stars = score >= 1100 ? 3 : score >= 700 ? 2 : 1;
+    const result = recordAdventure('forest', score, stars, { bones: this.bones, icon: '🐶', title: 'Douglas Dash Champion', journal: `Hudson helped Douglas race ${Math.round(this.distance)} metres and collect ${this.bones} bones.` });
+    const rewardText = result.critter ? `New critter: ${result.critter.icon} ${result.critter.name}!` : result.firstBadge ? 'New Forest Badge + Ranger Outfit!' : result.newStars ? `You improved by ${result.newStars} star!` : 'Great practice run!';
+    showAdventureResult(this, { title: neededBreather ? 'Douglas Took a Breather!' : 'TEMPLE TRAIL COMPLETE!', message: neededBreather ? 'Even champions stop for a drink. Every run still counts!' : 'Fast paws and brilliant steering!', stars, score, rewardText, onReplay: () => this.scene.restart() });
   }
 }

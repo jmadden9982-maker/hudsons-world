@@ -1,8 +1,7 @@
-// HapticManager.js — V6.0 Haptics
-let enabled = true;
+import { S } from './state.js';
 
 export const HapticManager = {
-  isEnabled() { return enabled; },
+  isEnabled() { return S.settings.vibration !== false; },
   vibrate(pattern) {
     if (!this.isEnabled()) return;
     try { if (navigator.vibrate) navigator.vibrate(pattern); } catch (e) {}

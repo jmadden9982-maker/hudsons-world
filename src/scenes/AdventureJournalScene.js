@@ -1,38 +1,22 @@
 import Phaser from 'phaser';
-import { FONT, makeHUD, makeDock, sceneBg, addBackButton } from '../ui/kit.js';
 import { S } from '../systems/state.js';
-import { SFX } from '../systems/audio.js';
-import { feel } from '../systems/feel.js';
+import { COLORS, paintBackground, roundedPanel, textStyle, topBar } from '../ui/kit.js';
 
 export default class AdventureJournalScene extends Phaser.Scene {
   constructor() { super('AdventureJournalScene'); }
-
   create() {
-    const { width:W, height:H } = this.scale;
-
-    sceneBg(this, 'bg_journal', 0xFBEAD0, 0xE6CBA6);
-    this.add.text(W/2, 56, '📖 The Adventures of Hudson', { fontFamily: FONT, fontSize: '26px', color: '#7a4a00', fontStyle: 'bold' }).setOrigin(0.5);
-
-    const entries = S.journal.slice(0, 40);
-    if (!entries.length) {
-      this.add.text(W/2, H/2, 'Your storybook is empty.\nPlay an adventure to write your first page!', { fontFamily: FONT, fontSize: '18px', color: '#7a5a28', fontStyle: 'bold', align: 'center' }).setOrigin(0.5);
-    }
-
-    const view = this.add.container(0, 0);
-    let y = 92;
-    entries.forEach(e => {
-      const card = this.add.container(W/2, y);
-      const gold = /GOLDEN|Kingdom/i.test(e.title);
-      const p = this.add.graphics();
-      p.fillStyle(0xFFFDF6, 1); p.fillRoundedRect(-W*0.42, -2, W*0.84, 72, 12);
-      p.fillStyle(gold ? 0xFFD23F : 0x9B6DD7, 1); p.fillRoundedRect(-W*0.42, -2, 8, 72, 4);
-      card.add([p, this.add.text(-W*0.40+18, 8, e.ic + '  ' + e.title, { fontFamily: FONT, fontSize: '16px', color: '#3b2b20', fontStyle: 'bold', wordWrap:{width:W*0.74} }),
-        this.add.text(-W*0.40+18, 34, e.text, { fontFamily: FONT, fontSize: '13px', color: '#5a4632', wordWrap:{width:W*0.76} })]);
-      view.add(card);
-      y += 84;
+    const { width: W, height: H } = this.scale; paintBackground(this, 0xd2aa76, 0x8e633d); topBar(this, 'THE ADVENTURES OF HUDSON');
+    roundedPanel(this, W / 2, 680, 650, 1050, 0xfffae9, 0.99, 0x8d5e31);
+    if (!S.journal.length) this.add.text(W / 2, H / 2, 'Your first story page is waiting.\nPlay an adventure to write it!', textStyle(23, COLORS.brown, { align: 'center', fontStyle: 'bold' })).setOrigin(0.5);
+    let y = 180;
+    S.journal.slice(0, 9).forEach((entry, i) => {
+      const paper = this.add.graphics(); paper.fillStyle(i % 2 ? 0xfff1cf : 0xffffff, 1); paper.fillRoundedRect(65, y - 8, 590, 98, 16);
+      paper.lineStyle(3, i % 2 ? 0xe3bd72 : 0xd9cbdc, 1); paper.strokeRoundedRect(65, y - 8, 590, 98, 16);
+      this.add.text(90, y + 15, entry.icon || entry.ic || '⭐', textStyle(36)).setOrigin(0, 0.5);
+      this.add.text(145, y + 4, entry.title, textStyle(18, COLORS.ink, { fontStyle: 'bold' })).setOrigin(0, 0.5);
+      this.add.text(145, y + 39, entry.text, textStyle(14, '#655a72', { wordWrap: { width: 480 } })).setOrigin(0, 0.5);
+      y += 112;
     });
-
-    makeHUD(this); makeDock(this, 'AdventureJournalScene');
-    addBackButton(this);
+    this.add.text(W / 2, H - 55, `${S.journal.length} adventure ${S.journal.length === 1 ? 'memory' : 'memories'} saved`, textStyle(16, '#ffffff', { fontStyle: 'bold' })).setOrigin(0.5);
   }
 }

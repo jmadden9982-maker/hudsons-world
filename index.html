@@ -3,9 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#6c4ccf">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="./manifest.json">
   <title>Hudson's World</title>
   <style>
-    body {
+    * { box-sizing: border-box; }
+    html, body {
       margin: 0;
       padding: 0;
       background: #1b1430;
@@ -13,13 +19,39 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
+      width: 100%;
+      height: 100%;
+      height: 100dvh;
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
+      overscroll-behavior: none;
     }
     #game {
       width: 100%;
       max-width: 100vw;
       max-height: 100vh;
+      max-height: 100dvh;
     }
+    canvas { display: block; margin: 0 auto; }
+    #hudson-error, #hudson-break {
+      position: fixed; inset: 0; z-index: 999999; display: grid; place-items: center;
+      padding: 24px; background: rgba(24, 17, 44, 0.94); font-family: "Trebuchet MS", Arial, sans-serif;
+      color: #2a2140; user-select: text; -webkit-user-select: text; touch-action: manipulation;
+    }
+    #hudson-error > div, #hudson-break > div {
+      width: min(560px, 94vw); padding: 28px; border: 5px solid #ffd447; border-radius: 24px;
+      background: #fff8e8; text-align: center; box-shadow: 0 14px 50px rgba(0,0,0,.45);
+    }
+    #hudson-error-icon, .hudson-error-icon, #hudson-break span { display: block; font-size: 76px; }
+    #hudson-error h2, #hudson-break h2 { margin: 8px 0; font-size: 28px; }
+    #hudson-error p, #hudson-break p { font-size: 18px; line-height: 1.45; }
+    #hudson-error button, #hudson-break button {
+      min-height: 58px; border: 0; border-radius: 16px; padding: 12px 22px; background: #40a95b;
+      color: white; font: 700 17px "Trebuchet MS", Arial, sans-serif;
+    }
+    #hudson-error details { margin-top: 20px; font-size: 13px; text-align: left; }
+    #hudson-error pre { overflow: auto; max-height: 180px; white-space: pre-wrap; }
   </style>
 </head>
 <body>
