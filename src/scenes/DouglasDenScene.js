@@ -4,6 +4,7 @@ import { button, COLORS, paintBackground, progressBar, roundedPanel, textStyle, 
 import AudioManager from '../systems/AudioManager.js';
 import { DOUGLAS_ABILITIES, DOUGLAS_SKINS } from '../data/collections.js';
 import { persist } from '../systems/state.js';
+import { createActor } from '../systems/CharacterActor.js';
 
 export default class DouglasDenScene extends Phaser.Scene {
   constructor() { super('DouglasDenScene'); }
@@ -11,7 +12,7 @@ export default class DouglasDenScene extends Phaser.Scene {
     AudioManager.setScene(this); const { width: W } = this.scale; paintBackground(this, 0xe2bd87, 0x9c6d43); topBar(this, 'DOUGLAS DEN');
     roundedPanel(this, W / 2, 510, 620, 830, 0xfff6df, 0.98, 0x9b683d);
     const skin = DOUGLAS_SKINS.find((item) => item.id === S.douglas.skin) || DOUGLAS_SKINS[0];
-    this.add.text(W / 2, 210, skin.icon, textStyle(105)).setOrigin(0.5);
+    this.douglasActor = createActor(this, 'douglas', W / 2, 210, { icon: skin.icon, size: 105 });
     this.add.text(W / 2, 315, this.moodLine(), textStyle(23, COLORS.brown, { fontStyle: 'bold' })).setOrigin(0.5);
     this.add.text(W / 2, 360, `LEVEL ${S.douglas.level} • ${DOUGLAS_ABILITIES[S.douglas.level - 1]}`, textStyle(17, COLORS.ink, { fontStyle: 'bold' })).setOrigin(0.5);
     progressBar(this, W / 2, 405, 470, S.douglas.level === 5 ? 60 : S.douglas.xp % 60, 60, 0xd99e19);
@@ -25,7 +26,7 @@ export default class DouglasDenScene extends Phaser.Scene {
     this.add.text(W / 2, 1010, 'Douglas never gets sad while you are away.', textStyle(16, '#ffffff')).setOrigin(0.5);
   }
   moodLine() { return S.douglas.joy >= 100 ? 'BEST FRIENDS FOREVER!' : S.douglas.joy >= 80 ? 'Douglas is delighted!' : 'Douglas is ready to play!'; }
-  care(action, message) { careForDouglas(action); AudioManager.playSfx('douglas_happy'); toast(this, message, 0x9b683d, 1100); this.time.delayedCall(600, () => this.scene.restart()); }
+  care(action, message) { careForDouglas(action); AudioManager.playSfx('douglas_happy'); this.douglasActor.playState('celebrate'); toast(this, message, 0x9b683d, 1100); this.time.delayedCall(600, () => this.scene.restart()); }
   showSkins() {
     const { width: W, height: H } = this.scale; const ov = this.add.container(0, 0).setDepth(150);
     ov.add(this.add.rectangle(W / 2, H / 2, W, H, 0x171126, 0.86).setInteractive());

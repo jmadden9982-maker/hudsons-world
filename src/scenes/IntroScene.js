@@ -2,12 +2,13 @@ import Phaser from 'phaser';
 import { S, addJournal, persist } from '../systems/state.js';
 import { ambientMotes, button, COLORS, premiumBackdrop, roundedPanel, textStyle } from '../ui/kit.js';
 import Narrator from '../systems/Narrator.js';
+import { createActor } from '../systems/CharacterActor.js';
 
 const pages = [
-  { icon: '👦', title: 'Meet Hudson', text: 'Explorer. Builder. Dino expert. Brilliant big brother.' },
-  { icon: '🐶', title: 'Meet Douglas', text: 'Hudson’s sausage-dog sidekick. Fast paws. Brave heart. Always hungry.' },
+  { characterId: 'hudson', icon: '👦', title: 'Meet Hudson', text: 'Explorer. Builder. Dino expert. Brilliant big brother.' },
+  { characterId: 'douglas', icon: '🐶', title: 'Meet Douglas', text: 'Hudson’s sausage-dog sidekick. Fast paws. Brave heart. Always hungry.' },
   { icon: '👨‍👩‍👦‍👦', title: 'The Family Team', text: 'Mum Aimee, Dad James and little Finley are ready to help on every adventure.' },
-  { icon: '🐱', title: 'Watch for Baby Bell!', text: 'The cheekiest cat in Hudson Town loves hiding in surprising places.' },
+  { characterId: 'babybell', icon: '🐱', title: 'Watch for Baby Bell!', text: 'The cheekiest cat in Hudson Town loves hiding in surprising places.' },
   { icon: '🏰', title: 'Your Big Mission', text: 'Earn one badge in every adventure to open the gates of Hudson Kingdom!' }
 ];
 
@@ -20,7 +21,12 @@ export default class IntroScene extends Phaser.Scene {
     premiumBackdrop(this, 'premium-title', { shade: 0.38, drift: false }); ambientMotes(this, { count: 12, color: 0xffe38d });
     this.add.text(W / 2, 85, `STORY ${this.page + 1} / ${pages.length}`, textStyle(17, '#ffffff', { fontStyle: 'bold' })).setOrigin(0.5);
     roundedPanel(this, W / 2, H / 2 - 40, 610, 650, 0xfffbef, 1, 0xffd447);
-    this.add.text(W / 2, H / 2 - 210, p.icon, textStyle(130)).setOrigin(0.5);
+    if (p.characterId) {
+      const actor = createActor(this, p.characterId, W / 2, H / 2 - 210, { icon: p.icon, size: 130 });
+      this.time.delayedCall(120, () => actor.playState('celebrate'));
+    } else {
+      this.add.text(W / 2, H / 2 - 210, p.icon, textStyle(130)).setOrigin(0.5);
+    }
     this.add.text(W / 2, H / 2 - 55, p.title, textStyle(36, COLORS.ink, { fontStyle: 'bold' })).setOrigin(0.5);
     this.add.text(W / 2, H / 2 + 55, p.text, textStyle(24, '#625773', { align: 'center', wordWrap: { width: 490 }, lineSpacing: 8 })).setOrigin(0.5);
     const last = this.page === pages.length - 1;

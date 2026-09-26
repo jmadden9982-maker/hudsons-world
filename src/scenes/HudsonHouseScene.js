@@ -1,12 +1,13 @@
 import Phaser from 'phaser';
 import { S, addAchievement, addJournal, addPhoto, addSticker, persist } from '../systems/state.js';
 import { button, COLORS, hud, paintBackground, roundedPanel, textStyle, toast, topBar } from '../ui/kit.js';
+import { createActor } from '../systems/CharacterActor.js';
 
 const family = [
-  { icon: '👩', name: 'Mum Aimee', line: '“You make every adventure brighter, Hudson.”', color: 0xe76586 },
-  { icon: '👨', name: 'Dad James', line: '“Right, chief. What brilliant thing are we building?”', color: 0x4f77bb },
-  { icon: '👶', name: 'Finley', line: 'Finley claps, grabs a block and causes cheerful chaos.', color: 0x48a990 },
-  { icon: '🐱', name: 'Baby Bell', line: 'Baby Bell has hidden again. Obviously.', color: 0x9b683d }
+  { characterId: 'aimee', icon: '👩', name: 'Mum Aimee', line: '“You make every adventure brighter, Hudson.”', color: 0xe76586 },
+  { characterId: 'james', icon: '👨', name: 'Dad James', line: '“Right, chief. What brilliant thing are we building?”', color: 0x4f77bb },
+  { characterId: 'finley', icon: '👶', name: 'Finley', line: 'Finley claps, grabs a block and causes cheerful chaos.', color: 0x48a990 },
+  { characterId: 'babybell', icon: '🐱', name: 'Baby Bell', line: 'Baby Bell has hidden again. Obviously.', color: 0x9b683d }
 ];
 
 export default class HudsonHouseScene extends Phaser.Scene {
@@ -15,13 +16,15 @@ export default class HudsonHouseScene extends Phaser.Scene {
     const { width: W, height: H } = this.scale; paintBackground(this, 0xf0bd87, 0x9d6a49); topBar(this, 'HUDSON HOUSE'); hud(this);
     this.add.rectangle(W / 2, 710, 660, 930, 0xf8e7cb, 0.82).setStrokeStyle(5, 0x9b683d);
     this.add.text(W / 2, 180, 'Home is the heart of every adventure', textStyle(20, COLORS.brown, { fontStyle: 'bold' })).setOrigin(0.5);
+    this.familyActors = {};
     family.forEach((person, i) => {
       const x = 205 + (i % 2) * 310; const y = 330 + Math.floor(i / 2) * 230;
       roundedPanel(this, x, y, 265, 185, 0xffffff, 0.97, person.color);
-      this.add.text(x, y - 45, person.icon, textStyle(54)).setOrigin(0.5);
+      this.familyActors[person.name] = createActor(this, person.characterId, x, y - 45, { icon: person.icon, size: 54 });
       this.add.text(x, y + 10, person.name, textStyle(18, COLORS.ink, { fontStyle: 'bold' })).setOrigin(0.5);
       this.add.text(x, y + 46, 'TAP TO CHAT', textStyle(13, '#766b87', { fontStyle: 'bold' })).setOrigin(0.5);
       this.add.zone(x, y, 265, 185).setInteractive({ useHandCursor: true }).on('pointerdown', () => {
+        this.familyActors[person.name].playState('celebrate');
         if (person.name === 'Baby Bell') this.findBell();
         else if (person.name === 'Finley') this.scene.start('FinleyChaosScene');
         else this.familyChat(person);

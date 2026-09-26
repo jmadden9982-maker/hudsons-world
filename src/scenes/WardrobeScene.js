@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { S, persist } from '../systems/state.js';
 import { COLORS, paintBackground, roundedPanel, textStyle, toast, topBar } from '../ui/kit.js';
+import { createActor } from '../systems/CharacterActor.js';
 
 const outfits = [
   { id: 'everyday', icon: '👕', name: 'Everyday Hudson', color: 0x47a8e8 },
@@ -19,7 +20,7 @@ export default class WardrobeScene extends Phaser.Scene {
     const { width: W } = this.scale; paintBackground(this, 0xc4b0ef, 0x7f67b8); topBar(this, 'HUDSON’S WARDROBE');
     roundedPanel(this, W / 2, 260, 590, 220, 0xfffbef, 0.98, 0x6c4ccf);
     const current = outfits.find((o) => o.id === S.outfit) || outfits[0];
-    this.add.text(W / 2 - 150, 250, '👦', textStyle(91)).setOrigin(0.5);
+    this.hudsonActor = createActor(this, 'hudson', W / 2 - 150, 250, { size: 91 });
     this.add.text(W / 2 + 100, 225, current.icon, textStyle(56)).setOrigin(0.5);
     this.add.text(W / 2 + 100, 290, current.name, textStyle(21, COLORS.ink, { fontStyle: 'bold' })).setOrigin(0.5);
     outfits.forEach((outfit, i) => {
@@ -28,7 +29,7 @@ export default class WardrobeScene extends Phaser.Scene {
       this.add.text(x - 95, y, open ? outfit.icon : '🔒', textStyle(44)).setOrigin(0.5);
       this.add.text(x + 25, y - 15, outfit.name, textStyle(16, open ? COLORS.ink : '#e5dfea', { fontStyle: 'bold', wordWrap: { width: 180 }, align: 'center' })).setOrigin(0.5);
       this.add.text(x + 25, y + 30, S.outfit === outfit.id ? 'WEARING' : open ? 'TAP TO WEAR' : 'Adventure reward', textStyle(12, open ? '#6c4ccf' : '#e5dfea', { fontStyle: 'bold' })).setOrigin(0.5);
-      if (open) this.add.zone(x, y, 310, 140).setInteractive({ useHandCursor: true }).on('pointerdown', () => { S.outfit = outfit.id; persist(); toast(this, `${outfit.icon} ${outfit.name} equipped!`, outfit.color); this.time.delayedCall(500, () => this.scene.restart()); });
+      if (open) this.add.zone(x, y, 310, 140).setInteractive({ useHandCursor: true }).on('pointerdown', () => { S.outfit = outfit.id; persist(); this.hudsonActor.playState('celebrate'); toast(this, `${outfit.icon} ${outfit.name} equipped!`, outfit.color); this.time.delayedCall(500, () => this.scene.restart()); });
     });
   }
 }
