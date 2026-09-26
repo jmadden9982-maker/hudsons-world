@@ -1,12 +1,14 @@
 import Phaser from 'phaser';
 import { CRITTERS, STICKERS } from '../data/collections.js';
 import { S } from '../systems/state.js';
-import { button, COLORS, paintBackground, roundedPanel, textStyle, topBar } from '../ui/kit.js';
+import { button, celebrateAt, COLORS, paintBackground, roundedPanel, textStyle, topBar } from '../ui/kit.js';
+import AudioManager from '../systems/AudioManager.js';
 
 export default class CollectionsScene extends Phaser.Scene {
   constructor() { super('CollectionsScene'); }
   init(data) { this.tab = data?.tab || this.tab || 'critters'; this.page = data?.page || 0; }
   create() {
+    AudioManager.setScene(this);
     const { width: W } = this.scale; paintBackground(this, 0x8ed6ef, 0x6bbd70); topBar(this, 'HUDSON’S COLLECTIONS');
     button(this, 205, 130, `🐾 CRITTERS ${S.critters.length}/${CRITTERS.length}`, () => this.scene.restart({ tab: 'critters', page: 0 }), { width: 300, height: 62, color: this.tab === 'critters' ? 0x40a95b : 0x756a86, fontSize: 16 });
     button(this, 515, 130, `✨ STICKERS ${S.stickers.length}/${STICKERS.length}`, () => this.scene.restart({ tab: 'stickers', page: 0 }), { width: 300, height: 62, color: this.tab === 'stickers' ? 0xd99e19 : 0x756a86, fontSize: 16 });
@@ -17,9 +19,22 @@ export default class CollectionsScene extends Phaser.Scene {
       this.add.text(x, y - 28, open ? item.icon : '❔', textStyle(51)).setOrigin(0.5);
       this.add.text(x, y + 28, open ? item.name : 'Mystery', textStyle(17, open ? COLORS.ink : '#eee8f2', { fontStyle: 'bold' })).setOrigin(0.5);
       if (open && item.home) this.add.text(x, y + 57, item.home, textStyle(12, '#6f6385')).setOrigin(0.5);
+      if (open) this.add.zone(x, y, 295, 165).setInteractive({ useHandCursor: true }).on('pointerdown', () => this.showDetail(item));
     });
     this.add.text(W / 2, 1115, `PAGE ${this.page + 1} / ${pages}`, textStyle(16, '#ffffff', { fontStyle: 'bold' })).setOrigin(0.5);
     button(this, 190, 1180, '‹ PREVIOUS', () => this.scene.restart({ tab: this.tab, page: Math.max(0, this.page - 1) }), { width: 250, height: 58, color: this.page ? 0x6c4ccf : 0x777181, fontSize: 17 });
     button(this, 530, 1180, 'NEXT ›', () => this.scene.restart({ tab: this.tab, page: Math.min(pages - 1, this.page + 1) }), { width: 250, height: 58, color: this.page < pages - 1 ? 0x6c4ccf : 0x777181, fontSize: 17 });
+  }
+  showDetail(item) {
+    const { width: W, height: H } = this.scale; const color = this.tab === 'critters' ? 0x40a95b : 0xd99e19;
+    const ov = this.add.container(0, 0).setDepth(150);
+    ov.add(this.add.rectangle(W / 2, H / 2, W, H, 0x160f2a, 0.86).setInteractive());
+    ov.add(roundedPanel(this, W / 2, H / 2, 580, 560, 0xffffff, 1, color).setDepth(151));
+    AudioManager.playSfx(this.tab === 'critters' ? 'bone_collect' : 'success'); celebrateAt(this, W / 2, H / 2 - 140, color);
+    const icon = this.add.text(W / 2, H / 2 - 170, item.icon, textStyle(90)).setOrigin(0.5).setDepth(152); ov.add(icon);
+    this.tweens.add({ targets: icon, angle: { from: -10, to: 10 }, duration: 140, yoyo: true, repeat: 3 });
+    ov.add(this.add.text(W / 2, H / 2 - 55, item.name, textStyle(27, COLORS.ink, { fontStyle: 'bold' })).setOrigin(0.5).setDepth(152));
+    if (item.home) ov.add(this.add.text(W / 2, H / 2, `Found in ${item.home}`, textStyle(17, '#6f6385')).setOrigin(0.5).setDepth(152));
+    ov.add(button(this, W / 2, H / 2 + 140, 'CLOSE', () => ov.destroy(), { width: 220, height: 54, color, depth: 153 }));
   }
 }
