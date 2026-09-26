@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { claimQuest, S } from '../systems/state.js';
-import { button, COLORS, paintBackground, progressBar, roundedPanel, textStyle, toast, topBar } from '../ui/kit.js';
+import { button, celebrateAt, COLORS, paintBackground, progressBar, roundedPanel, textStyle, toast, topBar } from '../ui/kit.js';
 
 const quests = [
   { id: 'bones', icon: '🦴', title: 'Douglas’ Bone Box', text: 'Collect 20 bones in Douglas Dash' },
@@ -21,7 +21,7 @@ export default class QuestScene extends Phaser.Scene {
       progressBar(this, 340, y + 32, 340, q.value, q.goal, q.claimed ? 0x40a95b : 0x6c4ccf);
       this.add.text(520, y + 32, `${q.value}/${q.goal}`, textStyle(15, COLORS.ink, { fontStyle: 'bold' })).setOrigin(0.5);
       if (q.claimed) this.add.text(590, y + 70, '✅ CLAIMED', textStyle(14, '#39824b', { fontStyle: 'bold' })).setOrigin(0.5);
-      else if (q.value >= q.goal) button(this, 560, y + 70, 'CLAIM ⭐⭐', () => { claimQuest(info.id); toast(this, 'Two bonus stars added!', 0x40a95b); this.time.delayedCall(550, () => this.scene.restart()); }, { width: 190, height: 52, color: 0x40a95b, fontSize: 15 });
+      else if (q.value >= q.goal) button(this, 560, y + 70, 'CLAIM ⭐⭐', () => { claimQuest(info.id); celebrateAt(this, W / 2, y, 0x40a95b); toast(this, 'Two bonus stars added!', 0x40a95b); this.time.delayedCall(550, () => this.scene.restart()); }, { width: 190, height: 52, color: 0x40a95b, fontSize: 15 });
       else this.add.text(560, y + 70, 'REWARD ⭐⭐', textStyle(14, '#6c4ccf', { fontStyle: 'bold' })).setOrigin(0.5);
     });
   }

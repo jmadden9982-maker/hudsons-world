@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { S, addAchievement, addJournal, addPhoto, addSticker, persist } from '../systems/state.js';
-import { button, COLORS, hud, paintBackground, roundedPanel, textStyle, toast, topBar } from '../ui/kit.js';
+import { button, celebrateAt, COLORS, hud, milestoneBurstAt, paintBackground, roundedPanel, textStyle, toast, topBar } from '../ui/kit.js';
 import { createActor } from '../systems/CharacterActor.js';
 
 const family = [
@@ -25,7 +25,8 @@ export default class HudsonHouseScene extends Phaser.Scene {
       this.add.text(x, y + 46, 'TAP TO CHAT', textStyle(13, '#766b87', { fontStyle: 'bold' })).setOrigin(0.5);
       this.add.zone(x, y, 265, 185).setInteractive({ useHandCursor: true }).on('pointerdown', () => {
         this.familyActors[person.name].playState('celebrate');
-        if (person.name === 'Baby Bell') this.findBell();
+        celebrateAt(this, x, y - 45, person.color);
+        if (person.name === 'Baby Bell') { this.findBell(); milestoneBurstAt(this, x, y - 45, S.babyBellCount, person.color); }
         else if (person.name === 'Finley') this.scene.start('FinleyChaosScene');
         else this.familyChat(person);
       });

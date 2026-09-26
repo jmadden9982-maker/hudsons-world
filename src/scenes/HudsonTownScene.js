@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { BUILDINGS } from '../data/collections.js';
 import { S, buildTownPlot, campaignBadges, townProgress } from '../systems/state.js';
-import { button, COLORS, paintBackground, roundedPanel, textStyle, toast, topBar } from '../ui/kit.js';
+import { button, celebrateAt, COLORS, paintBackground, roundedPanel, textStyle, toast, topBar } from '../ui/kit.js';
 import { decorateLivingWorld, worldLabel } from '../systems/WorldSystem.js';
 
 export default class HudsonTownScene extends Phaser.Scene {
@@ -38,7 +38,7 @@ export default class HudsonTownScene extends Phaser.Scene {
       hit.on('pointerdown', () => {
         if (locked) { toast(this, `Earn ${building.needBadges} badges to unlock ${building.name}.`, 0x6c4ccf); return; }
         if (used) { toast(this, `${building.name} already has a home.`, 0x6c4ccf); return; }
-        const wasMayor = S.town.mayor; buildTownPlot(plot, building.id); this.scene.restart({ celebrateMayor: !wasMayor && S.town.mayor });
+        const wasMayor = S.town.mayor; const built = buildTownPlot(plot, building.id); if (built) celebrateAt(this, x, y, building.color); this.scene.restart({ celebrateMayor: !wasMayor && S.town.mayor });
       });
     });
     overlay.add(button(this, W / 2, 1085, 'CLOSE', () => overlay.destroy(), { width: 240, height: 58, color: 0x6c4ccf, fontSize: 17, depth: 155 }));
@@ -46,6 +46,7 @@ export default class HudsonTownScene extends Phaser.Scene {
   showMayor() {
     const { width: W, height: H } = this.scale; const ov = this.add.container(0, 0).setDepth(200);
     ov.add(this.add.rectangle(W / 2, H / 2, W, H, 0x19122c, 0.86).setInteractive());
+    celebrateAt(this, W / 2, H / 2, 0xd99e19);
     ov.add(roundedPanel(this, W / 2, H / 2, 620, 600, 0xfff7c8, 1, 0xd99e19).setDepth(201));
     ov.add(this.add.text(W / 2, H / 2 - 150, '🎖️👦🏘️', textStyle(82)).setOrigin(0.5).setDepth(202));
     ov.add(this.add.text(W / 2, H / 2 - 35, 'MAYOR HUDSON!', textStyle(39, COLORS.ink, { fontStyle: 'bold' })).setOrigin(0.5).setDepth(202));

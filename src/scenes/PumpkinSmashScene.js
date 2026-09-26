@@ -27,7 +27,7 @@ export default class PumpkinSmashScene extends AdventureBase {
       if (!target.active || this.finished) return;
       if (type !== 'friend') {
         const value = type === 'gold' ? 3 : 1; this.smashed += 1; this.points += value; this.combo += 1; this.bestCombo = Math.max(this.bestCombo, this.combo); AudioManager.playSfx(type === 'gold' ? 'success' : 'reward');
-        this.floatingText(x, y, type === 'gold' ? 'GOLDEN ×3!' : `SMASH ×${this.combo}!`, '#ffd447'); this.celebrate(x, y, type === 'gold' ? 0xffe66e : 0xffa52f);
+        this.floatingText(x, y, type === 'gold' ? 'GOLDEN ×3!' : `SMASH ×${this.combo}!`, '#ffd447'); this.celebrate(x, y, type === 'gold' ? 0xffe66e : 0xffa52f); this.milestoneBurst(x, y, this.combo, 0xffa52f);
       } else {
         this.combo = 0; AudioManager.playSfx('button_click'); this.floatingText(x, y, target.text === '🐱' ? 'BABY BELL — SAFE!' : 'FINLEY’S HAT — SAFE!', '#ffffff');
       }
