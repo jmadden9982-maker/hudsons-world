@@ -1,4 +1,4 @@
-const CACHE = 'hudsons-world-premium-v11';
+const CACHE = 'hudsons-world-premium-v12';
 const CORE = [
   './', './index.html', './manifest.json', './icon-192.png', './icon-512.png',
   './assets/premium/title-world.png', './assets/premium/forest-run.png',

@@ -1,7 +1,8 @@
 import Phaser from 'phaser';
 import { S, campaignBadges } from '../systems/state.js';
-import { ambientMotes, button, COLORS, playerCard, premiumBackdrop, roundedPanel, textStyle } from '../ui/kit.js';
+import { ambientMotes, button, COLORS, playerCard, premiumBackdrop, roundedPanel, textStyle, toast } from '../ui/kit.js';
 import AudioManager from '../systems/AudioManager.js';
+import { checkForUpdateOnce } from '../systems/UpdateCheck.js';
 
 export default class MainMenuScene extends Phaser.Scene {
   constructor() { super('MainMenuScene'); }
@@ -23,5 +24,8 @@ export default class MainMenuScene extends Phaser.Scene {
     this.add.text(W / 2, 1105, 'HUDSON  •  DOUGLAS  •  FINLEY  •  MUM  •  DAD  •  BABY BELL', textStyle(13, '#ffffff', { fontStyle: 'bold', stroke: '#241747', strokeThickness: 4 })).setOrigin(0.5).setDepth(4);
     this.add.text(W / 2, H - 62, 'NO ADVERTS  •  NO PURCHASES  •  JUST ADVENTURE', textStyle(13, '#ffffff', { fontStyle: 'bold', backgroundColor: 'rgba(23,17,38,0.62)', padding: { x: 16, y: 9 } })).setOrigin(0.5).setDepth(4);
     this.tweens.add({ targets: badge, alpha: { from: 0.7, to: 1 }, duration: 1400, yoyo: true, repeat: -1 });
+    checkForUpdateOnce().then(({ updateAvailable }) => {
+      if (updateAvailable && this.sys.isActive()) toast(this, 'A new version is ready! See Settings → Check for Updates.', 0x249989, 3200);
+    });
   }
 }
