@@ -33,14 +33,23 @@ export default class PirateDigScene extends AdventureBase {
     this.floatingText(360, 980, '🧭 DOUGLAS’S COMPASS IS GLOWING!', '#ffd447');
     this.tweens.add({ targets: hint, scale: 1.45, alpha: 0.35, duration: 260, yoyo: true, repeat: 3 });
   }
+  digPuff(x, y, color = 0xdcae58) {
+    if (S.settings.calm) return;
+    for (let i = 0; i < 7; i += 1) {
+      const angle = Phaser.Math.FloatBetween(0, Math.PI * 2); const distance = Phaser.Math.Between(20, 48);
+      const grain = this.add.circle(x, y, Phaser.Math.Between(3, 6), color, 0.85).setDepth(9);
+      this.tweens.add({ targets: grain, x: x + Math.cos(angle) * distance, y: y + Math.sin(angle) * distance - 12, alpha: 0, duration: 340, ease: 'Quad.easeOut', onComplete: () => grain.destroy() });
+    }
+  }
   dig(tile) {
     if (!this.started || this.finished || tile.getData('used')) return;
     tile.setData('used', true); this.turns -= 1;
     const treasure = tile.getData('treasure'); const mark = tile.getData('mark');
+    this.tweens.add({ targets: mark, scale: { from: 0.4, to: 1 }, duration: 220, ease: 'Back.easeOut' });
     if (treasure) {
-      mark.setFontSize(38).setText('💰'); this.found += 1; this.missStreak = 0; AudioManager.playSfx('reward'); this.floatingText(tile.x, tile.y, 'TREASURE!', COLORS.yellow); this.celebrate(tile.x, tile.y, 0xffd447);
+      mark.setFontSize(38).setText('💰'); this.found += 1; this.missStreak = 0; AudioManager.playSfx('reward'); this.floatingText(tile.x, tile.y, 'TREASURE!', COLORS.yellow); this.digPuff(tile.x, tile.y, 0xffd447); this.celebrate(tile.x, tile.y, 0xffd447); this.milestoneBurst(tile.x, tile.y, this.found, 0xffd447);
     } else {
-      const nearby = this.nearbyCount(tile.getData('index')); mark.setFontSize(18).setText(nearby ? `${nearby}\nNEAR` : '🌊\nCLEAR'); this.missStreak += 1; AudioManager.playSfx('button_click'); this.floatingText(tile.x, tile.y, nearby ? `${nearby} TREASURE ${nearby === 1 ? 'IS' : 'ARE'} CLOSE!` : 'CLEAR SAND', '#ffffff');
+      const nearby = this.nearbyCount(tile.getData('index')); mark.setFontSize(18).setText(nearby ? `${nearby}\nNEAR` : '🌊\nCLEAR'); this.missStreak += 1; AudioManager.playSfx('button_click'); this.floatingText(tile.x, tile.y, nearby ? `${nearby} TREASURE ${nearby === 1 ? 'IS' : 'ARE'} CLOSE!` : 'CLEAR SAND', '#ffffff'); this.digPuff(tile.x, tile.y);
       if (this.missStreak >= 2) { this.missStreak = 0; this.compassHint(); }
     }
     this.status.setText(`🏴‍☠️ Treasure ${this.found}/5   ⛏️ Digs ${this.turns}`);

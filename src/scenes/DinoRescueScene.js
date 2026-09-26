@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import AdventureBase from './AdventureBase.js';
-import { recordAdventure } from '../systems/state.js';
+import { recordAdventure, S } from '../systems/state.js';
 import { ambientMotes, button, COLORS, premiumBackdrop, queuePremiumBackdrop, showAdventureResult, textStyle } from '../ui/kit.js';
 import AudioManager from '../systems/AudioManager.js';
 
@@ -14,7 +14,7 @@ export default class DinoRescueScene extends AdventureBase {
   constructor() { super('DinoRescueScene'); }
   preload() { queuePremiumBackdrop(this, 'premium-dino', 'assets/premium/dino-valley.png'); }
   create() {
-    const { width: W } = this.scale; this.round = 0; this.correct = 0; this.mistakes = 0; this.combo = 0; this.answering = false;
+    const { width: W } = this.scale; this.round = 0; this.correct = 0; this.mistakes = 0; this.combo = 0; this.streak = 0; this.answering = false;
     premiumBackdrop(this, 'premium-dino', { shade: 0.18, drift: false, transient: true }); ambientMotes(this, { count: 13, color: 0xcaff9a });
     this.add.text(W / 2, 150, '🦕  DINO NURSERY  🦖', textStyle(26, '#ffffff', { fontStyle: 'bold' })).setOrigin(0.5);
     this.eggHalo = this.add.circle(W / 2, 405, 105, 0xffffff, 0.35);
@@ -29,14 +29,22 @@ export default class DinoRescueScene extends AdventureBase {
     if (this.round >= 10) { this.finish(); return; }
     const choices = nests.filter((nest) => nest.id !== this.target?.id); this.target = Phaser.Utils.Array.GetRandom(choices); this.eggHalo.setFillStyle(this.target.color, 0.5); this.clue.setText(`${this.target.icon} This egg has a ${this.target.label.toLowerCase()} glow`); this.scoreText.setText(`Egg ${this.round + 1}/10   ✅ ${this.correct}   COMBO ×${this.combo}`);
   }
+  hatchConfetti(x, y) {
+    if (S.settings.calm) return;
+    for (let i = 0; i < 10; i += 1) {
+      const angle = Phaser.Math.FloatBetween(-Math.PI, 0); const distance = Phaser.Math.Between(35, 80);
+      const shard = this.add.text(x, y, Phaser.Utils.Array.GetRandom(['🐣', '✨']), textStyle(Phaser.Math.Between(14, 22))).setOrigin(0.5).setDepth(9);
+      this.tweens.add({ targets: shard, x: x + Math.cos(angle) * distance, y: y + Math.sin(angle) * distance, alpha: 0, angle: Phaser.Math.Between(-90, 90), duration: 480, ease: 'Quad.easeOut', onComplete: () => shard.destroy() });
+    }
+  }
   choose(id) {
     if (!this.started || this.finished || this.answering) return;
     if (id === this.target.id) {
-      this.answering = true; this.correct += 1; this.combo += 1; this.round += 1; AudioManager.playSfx('success'); this.floatingText(360, 405, `SAFE! COMBO ×${this.combo}`, COLORS.yellow); this.celebrate(360, 405, 0xcaff9a); this.egg.setText('🐣');
+      this.answering = true; this.correct += 1; this.combo += 1; this.streak += 1; this.round += 1; AudioManager.playSfx('success'); this.floatingText(360, 405, `SAFE! COMBO ×${this.combo}`, COLORS.yellow); this.celebrate(360, 405, 0xcaff9a); this.hatchConfetti(360, 405); this.milestoneBurst(360, 405, this.streak, 0xcaff9a); this.egg.setText('🐣');
       this.tweens.add({ targets: this.egg, scale: 1.25, angle: 8, duration: 180, yoyo: true });
       this.time.delayedCall(430, () => { this.answering = false; this.egg.setText('🥚').setAngle(0); this.nextEgg(); });
     } else {
-      this.answering = true; this.mistakes += 1; this.combo = 0; AudioManager.playSfx('button_click'); this.floatingText(360, 405, 'CHECK THE SYMBOL — TRY AGAIN!', '#ffffff');
+      this.answering = true; this.mistakes += 1; this.combo = 0; this.streak = 0; this.impact(0.004); AudioManager.playSfx('button_click'); this.floatingText(360, 405, 'CHECK THE SYMBOL — TRY AGAIN!', '#ffffff');
       this.tweens.add({ targets: this.egg, x: { from: 348, to: 372 }, duration: 70, yoyo: true, repeat: 2, onComplete: () => { this.egg.setX(360); this.answering = false; } });
       this.scoreText.setText(`Egg ${this.round + 1}/10   ✅ ${this.correct}   COMBO ×0`);
     }
