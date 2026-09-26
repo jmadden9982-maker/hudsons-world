@@ -33,7 +33,7 @@ export default class DouglasDashScene extends AdventureBase {
       const dx = p.x - startX; const dy = p.y - startY;
       if (Math.abs(dy) > 55 && dy < 0) this.jump(); else if (Math.abs(dx) > 50) this.changeLane(dx > 0 ? 1 : -1);
     });
-    this.begin('DOUGLAS DASH', 'Race down the three-lane temple trail. Swipe left or right to dodge logs. Swipe up to jump. Collect bones for Douglas!', '🐶');
+    this.begin('DOUGLAS DASH', 'Race down the three-lane temple trail. Swipe left or right to dodge logs. Swipe up to jump. Collect bones for Douglas! A rare Golden Bone gives Douglas a shield that bounces off obstacles safely.', '🐶');
   }
   onAdventureStart() {
     this.lastTime = this.time.now;
@@ -63,8 +63,10 @@ export default class DouglasDashScene extends AdventureBase {
   spawn(type) {
     if (!this.started || this.finished) return;
     const lane = Phaser.Math.Between(0, 2); const icon = type === 'bone' ? '🦴' : Phaser.Utils.Array.GetRandom(['🪵', '🪨']);
+    const golden = type === 'bone' && Math.random() < 0.12;
     const object = this.add.text(this.lanes[lane], 170, icon, textStyle(type === 'bone' ? 43 : 58)).setOrigin(0.5).setDepth(10);
-    object.setData({ lane, type, hit: false }); this.objects.push(object);
+    if (golden) object.setTint(0xffd700);
+    object.setData({ lane, type, golden, hit: false }); this.objects.push(object);
   }
   update(time, delta) {
     if (!this.started || this.finished) return;
@@ -76,7 +78,15 @@ export default class DouglasDashScene extends AdventureBase {
       if (!object.getData('hit') && object.y > 875 && object.y < 1035 && object.getData('lane') === this.lane) {
         object.setData('hit', true);
         if (object.getData('type') === 'bone') {
-          this.bones += 1; this.streak += 1; this.bestStreak = Math.max(this.bestStreak, this.streak); AudioManager.playSfx('bone_collect'); this.floatingText(object.x, object.y, this.streak > 1 ? `BONE STREAK ×${this.streak}` : '+1 BONE', COLORS.yellow); this.celebrate(object.x, object.y, 0xffd447); this.milestoneBurst(object.x, object.y, this.streak, 0xffd447); object.destroy();
+          const golden = object.getData('golden');
+          this.bones += 1; this.streak += 1; this.bestStreak = Math.max(this.bestStreak, this.streak); AudioManager.playSfx('bone_collect');
+          this.floatingText(object.x, object.y, golden ? '✨ GOLDEN BONE — SHIELD!' : (this.streak > 1 ? `BONE STREAK ×${this.streak}` : '+1 BONE'), COLORS.yellow);
+          this.celebrate(object.x, object.y, golden ? 0xffd700 : 0xffd447); this.milestoneBurst(object.x, object.y, this.streak, 0xffd447);
+          if (golden) {
+            this.invulnerable = true; this.player.setTint(0xffd700);
+            this.time.delayedCall(2500, () => { this.invulnerable = false; this.player.clearTint(); });
+          }
+          object.destroy();
         } else if (!this.jumping && !this.invulnerable) {
           this.hearts -= 1; this.streak = 0; this.invulnerable = true; AudioManager.playSfx('bump'); this.floatingText(object.x, object.y, 'BOUNCE!', '#ffdf7a'); this.impact(); object.destroy();
           this.playerActor.playState('hurt'); this.time.delayedCall(900, () => { this.invulnerable = false; });
