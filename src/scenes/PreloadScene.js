@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { FONT } from '../ui/kit.js';
+import { CHARACTER_ART } from '../data/characters.js';
 
 export default class PreloadScene extends Phaser.Scene {
   constructor() { super('PreloadScene'); }
@@ -22,6 +23,12 @@ export default class PreloadScene extends Phaser.Scene {
       'premium-icon': 'assets/premium/app-icon.png'
     };
     Object.entries(assets).forEach(([key, path]) => this.load.image(key, path));
+    // Character spritesheets are reused across almost every scene (unlike the
+    // per-adventure premium backdrops, which are large, single-use and lazy-
+    // loaded), so they're preloaded once here rather than per scene.
+    Object.entries(CHARACTER_ART).forEach(([id, art]) => {
+      this.load.spritesheet(art.texture, `assets/characters/${id}.png`, { frameWidth: art.frameWidth, frameHeight: art.frameHeight });
+    });
   }
   create() {
     const { width: W, height: H } = this.scale;

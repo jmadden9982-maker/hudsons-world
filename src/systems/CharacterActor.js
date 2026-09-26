@@ -32,7 +32,6 @@ export class CharacterActor {
     this.scene = scene;
     this.id = id;
     this.options = options;
-    this.baseScale = options.scale ?? 1;
     this.state = 'idle';
 
     const character = getCharacter(id) || { emoji: options.fallbackIcon || '❓', color: 0xffffff };
@@ -42,9 +41,15 @@ export class CharacterActor {
     if (this.hasArt) {
       ensureAnimations(scene, id, art);
       this.object = scene.add.sprite(x, y, art.texture).setDepth(options.depth ?? 15);
+      // `size` means "desired on-screen pixel size" for both render paths: for a
+      // sprite that's a scale factor against the native (square) frame, since a
+      // raw sprite would otherwise always render at its full 256x256 frame size
+      // regardless of what the caller's old emoji-era `size` value intended.
+      this.baseScale = options.scale ?? (options.size || 90) / art.frameWidth;
       this.object.setScale(this.baseScale);
     } else {
       const icon = options.icon || character.emoji;
+      this.baseScale = options.scale ?? 1;
       this.object = scene.add
         .text(x, y, icon, textStyle(options.size || 72, '#ffffff', { stroke: '#ffffff', strokeThickness: 3 }))
         .setOrigin(0.5)

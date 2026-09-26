@@ -16,8 +16,15 @@ test('every character entry is complete and self-consistent', () => {
 test('getCharacter/getCharacterArt resolve known ids and return null for unknown ones', () => {
   assert.equal(getCharacter('douglas').name, 'Douglas');
   assert.equal(getCharacter('nobody'), null);
-  assert.equal(getCharacterArt('douglas'), null);
-  assert.equal(hasRegisteredArt('douglas'), false);
+  assert.equal(getCharacterArt('nobody'), null);
+  assert.equal(hasRegisteredArt('nobody'), false);
+});
+
+test('every character now has real registered art', () => {
+  Object.keys(CHARACTERS).forEach((id) => {
+    assert.ok(hasRegisteredArt(id), `${id} should have registered art`);
+    assert.ok(getCharacterArt(id).texture, `${id} art is missing a texture key`);
+  });
 });
 
 test('animKey namespaces animation keys per character so ids never collide', () => {

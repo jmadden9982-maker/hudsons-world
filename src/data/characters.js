@@ -11,20 +11,29 @@ export const CHARACTERS = {
   james: { id: 'james', name: 'James', emoji: '👨', color: 0x4f77bb }
 };
 
-// Real illustrated art slots, keyed by the same character id. Empty until a real
-// spritesheet is dropped into public/assets/characters/<key>.png and preloaded
-// under the `texture` key below with its frame size. Once that texture exists in
-// a scene, CharacterActor automatically switches from the emoji fallback to a
-// real animated sprite with no gameplay code changes required.
-//
-// Example entry once art + frame layout is supplied:
-// douglas: { texture: 'char-douglas', frameWidth: 128, frameHeight: 128, states: {
-//   idle:      { start: 0,  end: 3,  frameRate: 6,  repeat: -1 },
-//   walk:      { start: 4,  end: 9,  frameRate: 12, repeat: -1 },
-//   celebrate: { start: 10, end: 15, frameRate: 14, repeat: 0 },
-//   hurt:      { start: 16, end: 17, frameRate: 10, repeat: 0 }
-// } }
-export const CHARACTER_ART = {};
+// Real illustrated art, keyed by the same character id. Each spritesheet is a
+// 1536x1024 transparent PNG in public/assets/characters/<key>.png, laid out as a
+// 6-column x 4-row grid of 256x256 frames (idle/walk/celebrate/hurt, in that row
+// order, padded with blank cells where a row has fewer than 6 poses). Preloaded
+// as spritesheets in PreloadScene. Once the texture exists in a scene,
+// CharacterActor automatically switches from the emoji fallback to the real
+// animated sprite with no gameplay code changes required.
+const FRAME = { frameWidth: 256, frameHeight: 256 };
+const STANDARD_STATES = {
+  idle: { start: 0, end: 3, frameRate: 6, repeat: -1 },
+  walk: { start: 6, end: 11, frameRate: 12, repeat: -1 },
+  celebrate: { start: 12, end: 17, frameRate: 14, repeat: 0 },
+  hurt: { start: 18, end: 19, frameRate: 10, repeat: 0 }
+};
+
+export const CHARACTER_ART = {
+  hudson: { texture: 'char-hudson', ...FRAME, states: STANDARD_STATES },
+  douglas: { texture: 'char-douglas', ...FRAME, states: STANDARD_STATES },
+  finley: { texture: 'char-finley', ...FRAME, states: STANDARD_STATES },
+  babybell: { texture: 'char-babybell', ...FRAME, states: STANDARD_STATES },
+  aimee: { texture: 'char-aimee', ...FRAME, states: STANDARD_STATES },
+  james: { texture: 'char-james', ...FRAME, states: STANDARD_STATES }
+};
 
 export function getCharacter(id) {
   return CHARACTERS[id] || null;

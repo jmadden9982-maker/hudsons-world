@@ -1,4 +1,4 @@
-const CACHE = 'hudsons-world-premium-v10';
+const CACHE = 'hudsons-world-premium-v11';
 const CORE = [
   './', './index.html', './manifest.json', './icon-192.png', './icon-512.png',
   './assets/premium/title-world.png', './assets/premium/forest-run.png',
@@ -6,7 +6,10 @@ const CORE = [
   './assets/premium/space-rescue.png', './assets/premium/pumpkin-patch.png',
   './assets/premium/hudson-kingdom.png', './assets/premium/winter-village.png',
   './assets/premium/finley-playroom.png',
-  './assets/premium/app-icon.png'
+  './assets/premium/app-icon.png',
+  './assets/characters/hudson.png', './assets/characters/douglas.png',
+  './assets/characters/finley.png', './assets/characters/babybell.png',
+  './assets/characters/aimee.png', './assets/characters/james.png'
 ];
 
 self.addEventListener('install', (event) => {
