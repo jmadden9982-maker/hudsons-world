@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { chaosBatchSize, eggMatches, isMilestone, isRainbowRound, nearestDestination, nearbyTreasureCount, pickBonusIndex, smoothDelta, withinRadius } from '../src/systems/gameplay.js';
+import { chaosBatchSize, eggMatches, isMilestone, isRainbowRound, nearestDestination, nearbyTreasureCount, pickBonusIndex, pickSpaceSpawnType, smoothDelta, withinRadius } from '../src/systems/gameplay.js';
 
 test('lag spikes are capped so moving objects cannot jump across the playfield', () => {
   assert.equal(smoothDelta(16.67), 16.67);
@@ -55,6 +55,17 @@ test('a bonus index always lands outside the excluded set, across the full roll 
   assert.equal(pickBonusIndex(excluded, 16, 0), 5);
   assert.equal(pickBonusIndex(excluded, 16, 0.999), 15);
   for (let roll = 0; roll < 1; roll += 0.05) assert.ok(!excluded.has(pickBonusIndex(excluded, 16, roll)));
+});
+
+test('Space Rescue spawn bands cover the whole roll range with no gaps or overlaps', () => {
+  assert.equal(pickSpaceSpawnType(0), 'astronaut');
+  assert.equal(pickSpaceSpawnType(0.43), 'astronaut');
+  assert.equal(pickSpaceSpawnType(0.44), 'stardust');
+  assert.equal(pickSpaceSpawnType(0.61), 'stardust');
+  assert.equal(pickSpaceSpawnType(0.62), 'shield');
+  assert.equal(pickSpaceSpawnType(0.69), 'shield');
+  assert.equal(pickSpaceSpawnType(0.7), 'asteroid');
+  assert.equal(pickSpaceSpawnType(0.999), 'asteroid');
 });
 
 test('streak milestones fire only on every 5th, never on zero', () => {

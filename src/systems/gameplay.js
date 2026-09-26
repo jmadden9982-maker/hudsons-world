@@ -46,6 +46,15 @@ export function chaosBatchSize(tidied, remaining, rollDual, unlockAt = 4) {
   return rollDual ? 2 : 1;
 }
 
+// Space Rescue's spawn-type bands, factored out so the thresholds are
+// unit-testable independent of Math.random.
+export function pickSpaceSpawnType(roll) {
+  if (roll < 0.44) return 'astronaut';
+  if (roll < 0.62) return 'stardust';
+  if (roll < 0.7) return 'shield';
+  return 'asteroid';
+}
+
 // Picks a bonus grid index outside a set of already-reserved ones (e.g. Pirate
 // Dig's Lucky Chest, kept separate from the five required treasures) from a
 // caller-supplied roll in [0, 1), so it's deterministic and testable.

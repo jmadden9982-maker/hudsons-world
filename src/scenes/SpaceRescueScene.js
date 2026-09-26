@@ -3,7 +3,7 @@ import AdventureBase from './AdventureBase.js';
 import { S, recordAdventure } from '../systems/state.js';
 import { ambientMotes, premiumBackdrop, queuePremiumBackdrop, showAdventureResult, textStyle } from '../ui/kit.js';
 import AudioManager from '../systems/AudioManager.js';
-import { smoothDelta, withinRadius } from '../systems/gameplay.js';
+import { pickSpaceSpawnType, smoothDelta, withinRadius } from '../systems/gameplay.js';
 
 export default class SpaceRescueScene extends AdventureBase {
   constructor() { super('SpaceRescueScene'); }
@@ -47,9 +47,9 @@ export default class SpaceRescueScene extends AdventureBase {
 
   spawn() {
     if (this.finished || !this.started) return;
-    const roll = Math.random(); const type = roll < 0.48 ? 'astronaut' : roll < 0.68 ? 'stardust' : 'asteroid';
-    const icon = { astronaut: '🧑‍🚀', stardust: '✨', asteroid: '☄️' }[type];
-    const size = { astronaut: 47, stardust: 42, asteroid: 61 }[type];
+    const type = pickSpaceSpawnType(Math.random());
+    const icon = { astronaut: '🧑‍🚀', stardust: '✨', shield: '🛡️', asteroid: '☄️' }[type];
+    const size = { astronaut: 47, stardust: 42, shield: 46, asteroid: 61 }[type];
     const object = this.add.text(Phaser.Math.Between(60, 660), 155, icon, textStyle(size)).setOrigin(0.5).setDepth(10);
     object.setData({ type, speed: Phaser.Math.FloatBetween(S.settings.calm ? 0.18 : 0.23, S.settings.calm ? 0.25 : 0.34), phase: Phaser.Math.FloatBetween(0, Math.PI * 2), age: 0 });
     object.setScale(0.35); this.tweens.add({ targets: object, scale: 1, duration: 300, ease: 'Back.easeOut' });
@@ -79,6 +79,11 @@ export default class SpaceRescueScene extends AdventureBase {
     } else if (type === 'stardust') {
       this.stardust += 1; this.combo += 1; AudioManager.playSfx('bone_collect');
       this.floatingText(object.x, object.y, 'STARDUST!', '#e3a8ff'); this.celebrate(object.x, object.y, 0xd28cff); this.spacePuff(object.x, object.y, 0xd28cff); this.milestoneBurst(object.x, object.y, this.combo, 0xd28cff);
+    } else if (type === 'shield') {
+      AudioManager.playSfx('success');
+      if (this.shields < this.maxShields) { this.shields += 1; this.floatingText(object.x, object.y, 'SHIELD RESTORED!', '#8fdcff'); }
+      else { this.combo += 1; this.floatingText(object.x, object.y, 'FULL SHIELDS — BONUS!', '#8fdcff'); }
+      this.celebrate(object.x, object.y, 0x8fdcff); this.spacePuff(object.x, object.y, 0x8fdcff);
     } else if (!this.invulnerable) {
       this.shields -= 1; this.combo = 0; this.invulnerable = true; AudioManager.playSfx('bump'); this.impact(0.008);
       this.ship.setAlpha(0.38); this.time.delayedCall(900, () => { this.invulnerable = false; if (this.ship.active) this.ship.setAlpha(1); });
