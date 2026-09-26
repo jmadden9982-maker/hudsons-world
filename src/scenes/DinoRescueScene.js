@@ -3,18 +3,20 @@ import AdventureBase from './AdventureBase.js';
 import { recordAdventure, S } from '../systems/state.js';
 import { ambientMotes, button, COLORS, premiumBackdrop, queuePremiumBackdrop, showAdventureResult, textStyle } from '../ui/kit.js';
 import AudioManager from '../systems/AudioManager.js';
+import { eggMatches, isRainbowRound } from '../systems/gameplay.js';
 
 const nests = [
   { id: 'leaf', label: 'LEAF NEST', icon: '🌿', color: 0x4aa959 },
   { id: 'sun', label: 'SUN NEST', icon: '☀️', color: 0xe6a52d },
   { id: 'sky', label: 'SKY NEST', icon: '☁️', color: 0x4fa8dd }
 ];
+const RAINBOW = { id: 'rainbow', label: 'RAINBOW EGG', icon: '🌈', color: 0xd67ee8 };
 
 export default class DinoRescueScene extends AdventureBase {
   constructor() { super('DinoRescueScene'); }
   preload() { queuePremiumBackdrop(this, 'premium-dino', 'assets/premium/dino-valley.png'); }
   create() {
-    const { width: W } = this.scale; this.round = 0; this.correct = 0; this.mistakes = 0; this.combo = 0; this.streak = 0; this.answering = false;
+    const { width: W } = this.scale; this.round = 0; this.correct = 0; this.mistakes = 0; this.combo = 0; this.streak = 0; this.rainbowCaught = 0; this.answering = false;
     premiumBackdrop(this, 'premium-dino', { shade: 0.18, drift: false, transient: true }); ambientMotes(this, { count: 13, color: 0xcaff9a });
     this.add.text(W / 2, 150, '🦕  DINO NURSERY  🦖', textStyle(26, '#ffffff', { fontStyle: 'bold' })).setOrigin(0.5);
     this.eggHalo = this.add.circle(W / 2, 405, 105, 0xffffff, 0.35);
@@ -22,12 +24,18 @@ export default class DinoRescueScene extends AdventureBase {
     this.clue = this.add.text(W / 2, 535, '', textStyle(23, COLORS.ink, { fontStyle: 'bold', backgroundColor: '#fff8e8', padding: { x: 20, y: 12 } })).setOrigin(0.5);
     this.scoreText = this.add.text(W / 2, 610, 'Egg 1/10   ✅ 0   COMBO ×0', textStyle(19, '#ffffff', { fontStyle: 'bold' })).setOrigin(0.5);
     nests.forEach((nest, i) => button(this, W / 2, 720 + i * 105, `${nest.icon}  ${nest.label}`, () => this.choose(nest.id), { width: 430, height: 78, color: nest.color, fontSize: 21 }));
-    this.begin('DINO EGG RESCUE', 'Each baby dinosaur egg has a coloured glow. Tap the matching nest and help all ten eggs hatch safely!', '🦖');
+    this.begin('DINO EGG RESCUE', 'Each baby dinosaur egg has a coloured glow. Tap the matching nest and help all ten eggs hatch safely! Watch for a rare Rainbow Egg — any nest works for that one!', '🦖');
   }
   onAdventureStart() { this.nextEgg(); }
   nextEgg() {
     if (this.round >= 10) { this.finish(); return; }
-    const choices = nests.filter((nest) => nest.id !== this.target?.id); this.target = Phaser.Utils.Array.GetRandom(choices); this.eggHalo.setFillStyle(this.target.color, 0.5); this.clue.setText(`${this.target.icon} This egg has a ${this.target.label.toLowerCase()} glow`); this.scoreText.setText(`Egg ${this.round + 1}/10   ✅ ${this.correct}   COMBO ×${this.combo}`);
+    if (isRainbowRound(this.round, Math.random())) {
+      this.target = RAINBOW; this.eggHalo.setFillStyle(RAINBOW.color, 0.5);
+      this.clue.setText('🌈 A RAINBOW EGG! Any nest is right!');
+    } else {
+      const choices = nests.filter((nest) => nest.id !== this.target?.id); this.target = Phaser.Utils.Array.GetRandom(choices); this.eggHalo.setFillStyle(this.target.color, 0.5); this.clue.setText(`${this.target.icon} This egg has a ${this.target.label.toLowerCase()} glow`);
+    }
+    this.scoreText.setText(`Egg ${this.round + 1}/10   ✅ ${this.correct}   COMBO ×${this.combo}`);
   }
   hatchConfetti(x, y) {
     if (S.settings.calm) return;
@@ -39,8 +47,11 @@ export default class DinoRescueScene extends AdventureBase {
   }
   choose(id) {
     if (!this.started || this.finished || this.answering) return;
-    if (id === this.target.id) {
-      this.answering = true; this.correct += 1; this.combo += 1; this.streak += 1; this.round += 1; AudioManager.playSfx('success'); this.floatingText(360, 405, `SAFE! COMBO ×${this.combo}`, COLORS.yellow); this.celebrate(360, 405, 0xcaff9a); this.hatchConfetti(360, 405); this.milestoneBurst(360, 405, this.streak, 0xcaff9a); this.egg.setText('🐣');
+    if (eggMatches(this.target.id, id)) {
+      const isRainbow = this.target.id === 'rainbow'; if (isRainbow) { this.rainbowCaught += 1; this.combo += 1; }
+      this.answering = true; this.correct += 1; this.combo += 1; this.streak += 1; this.round += 1; AudioManager.playSfx('success');
+      this.floatingText(360, 405, isRainbow ? 'RAINBOW BONUS!' : `SAFE! COMBO ×${this.combo}`, isRainbow ? '#d67ee8' : COLORS.yellow);
+      this.celebrate(360, 405, isRainbow ? 0xd67ee8 : 0xcaff9a); this.hatchConfetti(360, 405); this.milestoneBurst(360, 405, this.streak, 0xcaff9a); this.egg.setText('🐣');
       this.tweens.add({ targets: this.egg, scale: 1.25, angle: 8, duration: 180, yoyo: true });
       this.time.delayedCall(430, () => { this.answering = false; this.egg.setText('🥚').setAngle(0); this.nextEgg(); });
     } else {
@@ -50,9 +61,10 @@ export default class DinoRescueScene extends AdventureBase {
     }
   }
   finish() {
-    if (this.finished) return; this.finished = true; const stars = this.mistakes <= 2 ? 3 : this.mistakes <= 5 ? 2 : 1; const score = Math.max(500, this.correct * 140 - this.mistakes * 30);
+    if (this.finished) return; this.finished = true; const stars = this.mistakes <= 2 ? 3 : this.mistakes <= 5 ? 2 : 1; const score = Math.max(500, this.correct * 140 - this.mistakes * 30 + this.rainbowCaught * 60);
     const result = recordAdventure('dino', score, stars, { icon: '🦖', title: 'Dino Valley Rescue', journal: `Dino Doctor Hudson guided ${this.correct} eggs to the right nests.` });
     const rewardText = result.critter ? `New critter: ${result.critter.icon} ${result.critter.name}!` : result.firstBadge ? 'New Dino Badge + Dino Outfit!' : 'The nursery is safe and sound.';
-    showAdventureResult(this, { title: 'BABY DINOS RESCUED!', message: `All ${this.correct} eggs are snug in their nests after ${this.mistakes} ${this.mistakes === 1 ? 'retry' : 'retries'}.`, stars, score, scoreLabel: 'Rescue score', rewardText, onReplay: () => this.scene.restart() });
+    const rainbowLine = this.rainbowCaught ? ` Spotted ${this.rainbowCaught} rainbow ${this.rainbowCaught === 1 ? 'egg' : 'eggs'}!` : '';
+    showAdventureResult(this, { title: 'BABY DINOS RESCUED!', message: `All ${this.correct} eggs are snug in their nests after ${this.mistakes} ${this.mistakes === 1 ? 'retry' : 'retries'}.${rainbowLine}`, stars, score, scoreLabel: 'Rescue score', rewardText, onReplay: () => this.scene.restart() });
   }
 }

@@ -28,3 +28,20 @@ export function nearestDestination(x, y, destinations) {
     return !best || distance < best.distance ? { destination, distance } : best;
   }, null);
 }
+
+// A rainbow egg can only appear once earlier rounds have taught the core
+// matching rule, and never punishes — it just widens what counts as correct.
+export function isRainbowRound(round, roll, unlockRound = 5, chance = 0.22) {
+  return round >= unlockRound && roll < chance;
+}
+
+export function eggMatches(targetId, chosenId) {
+  return targetId === 'rainbow' || targetId === chosenId;
+}
+
+// How many toys spawn together once Finley Chaos has established the single-
+// toy rule. Never doubles up on the final toy, so the round always ends clean.
+export function chaosBatchSize(tidied, remaining, rollDual, unlockAt = 4) {
+  if (tidied < unlockAt || remaining <= 1) return 1;
+  return rollDual ? 2 : 1;
+}
