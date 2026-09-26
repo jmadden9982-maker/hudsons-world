@@ -3,6 +3,9 @@ import AdventureBase from './AdventureBase.js';
 import { S, recordAdventure } from '../systems/state.js';
 import { ambientMotes, premiumBackdrop, queuePremiumBackdrop, showAdventureResult, textStyle } from '../ui/kit.js';
 import AudioManager from '../systems/AudioManager.js';
+import { isMilestone } from '../systems/gameplay.js';
+
+const FRENZY_DURATION = 3000;
 
 export default class PumpkinSmashScene extends AdventureBase {
   constructor() { super('PumpkinSmashScene'); }
@@ -12,7 +15,7 @@ export default class PumpkinSmashScene extends AdventureBase {
     premiumBackdrop(this, 'premium-pumpkin', { shade: 0.08, drift: false, transient: true }); ambientMotes(this, { count: 18, color: 0xffc35c, depth: -1 });
     this.status = this.add.text(28, 108, '🎃 0   COMBO ×0', textStyle(20, '#ffffff', { fontStyle: 'bold', backgroundColor: '#5d3a23', padding: { x: 14, y: 8 } })).setDepth(40);
     this.add.text(W / 2, H - 80, 'Tap pumpkins • Gold pumpkins score ×3 • Protect the family!', textStyle(16, '#ffffff', { fontStyle: 'bold', stroke: '#5d3a23', strokeThickness: 5 })).setOrigin(0.5);
-    this.begin('PUMPKIN PATCH', 'Tap pumpkins as they pop up. Golden pumpkins are worth three points. Leave Finley’s hat and Baby Bell safely alone to keep your harvest combo!', '🎃');
+    this.begin('PUMPKIN PATCH', 'Tap pumpkins as they pop up. Golden pumpkins are worth three points. Leave Finley’s hat and Baby Bell safely alone to keep your harvest combo! Every 8-combo triggers a Harvest Frenzy — double points for a few seconds!', '🎃');
   }
   onAdventureStart() {
     this.spawnEvent = this.time.addEvent({ delay: S.settings.calm ? 850 : 600, loop: true, callback: () => this.spawn() });
@@ -26,12 +29,14 @@ export default class PumpkinSmashScene extends AdventureBase {
     target.on('pointerdown', () => {
       if (!target.active || this.finished) return;
       if (type !== 'friend') {
-        const value = type === 'gold' ? 3 : 1; this.smashed += 1; this.points += value; this.combo += 1; this.bestCombo = Math.max(this.bestCombo, this.combo); AudioManager.playSfx(type === 'gold' ? 'success' : 'reward');
-        this.floatingText(x, y, type === 'gold' ? 'GOLDEN ×3!' : `SMASH ×${this.combo}!`, '#ffd447'); this.celebrate(x, y, type === 'gold' ? 0xffe66e : 0xffa52f); this.milestoneBurst(x, y, this.combo, 0xffa52f);
+        const frenzy = this.time.now < (this.frenzyUntil || 0); const value = (type === 'gold' ? 3 : 1) * (frenzy ? 2 : 1);
+        this.smashed += 1; this.points += value; this.combo += 1; this.bestCombo = Math.max(this.bestCombo, this.combo); AudioManager.playSfx(type === 'gold' ? 'success' : 'reward');
+        this.floatingText(x, y, type === 'gold' ? `GOLDEN ×${frenzy ? 6 : 3}!` : `SMASH +${value}!`, '#ffd447'); this.celebrate(x, y, type === 'gold' ? 0xffe66e : 0xffa52f); this.milestoneBurst(x, y, this.combo, 0xffa52f);
+        if (isMilestone(this.combo, 8)) { this.frenzyUntil = this.time.now + FRENZY_DURATION; this.floatingText(x, y - 70, '🔥 HARVEST FRENZY!', '#ff8f3d'); this.impact(0.004); }
       } else {
         this.combo = 0; AudioManager.playSfx('button_click'); this.floatingText(x, y, target.text === '🐱' ? 'BABY BELL — SAFE!' : 'FINLEY’S HAT — SAFE!', '#ffffff');
       }
-      target.destroy(); this.status.setText(`🎃 ${this.points}   COMBO ×${this.combo}`);
+      target.destroy(); this.status.setText(`🎃 ${this.points}   COMBO ×${this.combo}${this.time.now < (this.frenzyUntil || 0) ? '  🔥×2' : ''}`);
     });
     this.time.delayedCall(S.settings.calm ? 1500 : 1150, () => {
       if (!target.active) return;

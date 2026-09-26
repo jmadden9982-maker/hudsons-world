@@ -11,7 +11,7 @@ export default class WinterVillageScene extends AdventureBase {
   preload() { queuePremiumBackdrop(this, 'premium-winter', 'assets/premium/winter-village.png'); }
 
   create() {
-    this.snowScore = 0; this.caught = 0; this.combo = 0; this.bestCombo = 0; this.warmth = 3;
+    this.snowScore = 0; this.caught = 0; this.combo = 0; this.bestCombo = 0; this.warmth = 3; this.crystalChain = 0;
     this.targets = []; this.targetX = 360;
     premiumBackdrop(this, 'premium-winter', { shade: 0.06, drift: false, transient: true });
     ambientMotes(this, { count: 20, color: 0xdff6ff, depth: -1 });
@@ -25,7 +25,7 @@ export default class WinterVillageScene extends AdventureBase {
     const steer = (pointer) => { if (this.started && !this.finished && pointer.y > 190) this.targetX = Phaser.Math.Clamp(pointer.x, 80, 640); };
     this.input.on('pointerdown', steer); this.input.on('pointermove', (pointer) => { if (pointer.isDown) steer(pointer); });
     this.updateStatus();
-    this.begin('WINTER VILLAGE', 'Guide the sleigh across the snow. Catch falling snowflakes and rare ice crystals, but steer away from the hot cocoa. Build a combo without tapping anything!', '❄️🛷');
+    this.begin('WINTER VILLAGE', 'Guide the sleigh across the snow. Catch falling snowflakes and rare ice crystals, but steer away from the hot cocoa. Catch three ice crystals in a row for a Crystal Chain Bonus — extra warmth and points!', '❄️🛷');
   }
 
   onAdventureStart() {
@@ -50,12 +50,21 @@ export default class WinterVillageScene extends AdventureBase {
   catchTarget(target) {
     const type = target.getData('type'); target.setData('caught', true);
     if (type === 'cocoa') {
-      this.warmth -= 1; this.combo = 0; AudioManager.playSfx('bump'); this.impact(0.006);
+      this.warmth -= 1; this.combo = 0; this.crystalChain = 0; AudioManager.playSfx('bump'); this.impact(0.006);
       this.floatingText(target.x, target.y, 'TOO TOASTY!', '#ffd28a');
     } else {
       const points = type === 'crystal' ? 3 : 1; this.snowScore += points; this.caught += 1; this.combo += 1; this.bestCombo = Math.max(this.bestCombo, this.combo);
       AudioManager.playSfx(type === 'crystal' ? 'reward' : 'success'); this.floatingText(target.x, target.y, type === 'crystal' ? '+3 ICE CRYSTAL' : '+1 SNOW', '#ffffff');
       this.celebrate(target.x, target.y, type === 'crystal' ? 0x8fe7ff : 0xdff6ff); this.milestoneBurst(target.x, target.y, this.combo, 0x8fe7ff);
+      if (type === 'crystal') {
+        this.crystalChain += 1;
+        if (this.crystalChain >= 3) {
+          this.warmth = Math.min(3, this.warmth + 1); this.snowScore += 10; this.crystalChain = 0;
+          this.floatingText(target.x, target.y - 60, '❄️ CRYSTAL CHAIN BONUS!', '#8fe7ff'); this.celebrate(target.x, target.y, 0x8fe7ff);
+        }
+      } else {
+        this.crystalChain = 0;
+      }
     }
     target.destroy(); this.updateStatus(); if (this.warmth <= 0) this.time.delayedCall(150, () => this.finish(true));
   }
