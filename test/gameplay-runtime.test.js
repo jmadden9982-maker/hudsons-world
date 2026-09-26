@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { nearestDestination, nearbyTreasureCount, smoothDelta, withinRadius } from '../src/systems/gameplay.js';
+import { isMilestone, nearestDestination, nearbyTreasureCount, smoothDelta, withinRadius } from '../src/systems/gameplay.js';
 
 test('lag spikes are capped so moving objects cannot jump across the playfield', () => {
   assert.equal(smoothDelta(16.67), 16.67);
@@ -27,4 +27,13 @@ test('Finley drops resolve to the genuinely nearest home', () => {
   const homes = [{ id: 'box', x: 100, y: 100 }, { id: 'bed', x: 600, y: 900 }];
   assert.equal(nearestDestination(570, 860, homes).destination.id, 'bed');
   assert.equal(nearestDestination(110, 130, homes).destination.id, 'box');
+});
+
+test('streak milestones fire only on every 5th, never on zero', () => {
+  assert.equal(isMilestone(0), false);
+  assert.equal(isMilestone(1), false);
+  assert.equal(isMilestone(4), false);
+  assert.equal(isMilestone(5), true);
+  assert.equal(isMilestone(10), true);
+  assert.equal(isMilestone(6, 3), true);
 });

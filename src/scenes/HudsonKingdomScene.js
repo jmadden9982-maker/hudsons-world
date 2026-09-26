@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { S, addAchievement, addJournal, addOutfit, addSticker, persist, totalZoneStars } from '../systems/state.js';
 import { ambientMotes, button, COLORS, premiumBackdrop, queuePremiumBackdrop, roundedPanel, textStyle, topBar } from '../ui/kit.js';
 import AudioManager from '../systems/AudioManager.js';
+import { createActor } from '../systems/CharacterActor.js';
 
 export default class HudsonKingdomScene extends Phaser.Scene {
   constructor() { super('HudsonKingdomScene'); }
@@ -21,9 +22,11 @@ export default class HudsonKingdomScene extends Phaser.Scene {
     ov.add(this.add.rectangle(W / 2, H / 2, W, H, 0x160f2a, 0.9).setInteractive());
     const rays = [];
     for (let i = 0; i < 12; i += 1) { const r = this.add.rectangle(W / 2, H / 2 - 60, 14, 600, 0xffd447, 0.35).setAngle(i * 30); rays.push(r); ov.add(r); }
-    const dog = this.add.text(W / 2, H / 2 - 80, '🐶', textStyle(180)).setOrigin(0.5).setTint(0xffd447).setScale(0.15); ov.add(dog);
+    const douglasActor = createActor(this, 'douglas', W / 2, H / 2 - 80, { size: 180 });
+    const dog = douglasActor.object.setTint(0xffd447).setScale(0.15); ov.add(dog);
     this.tweens.add({ targets: rays, angle: '+=120', duration: 3600 });
     this.tweens.add({ targets: dog, scale: 1, angle: 360, duration: 900, ease: 'Back.easeOut', onComplete: () => {
+      douglasActor.playState('celebrate');
       ov.add(this.add.text(W / 2, H / 2 + 90, 'GOLDEN DOUGLAS!', textStyle(40, COLORS.yellow, { fontStyle: 'bold', stroke: '#3b2d68', strokeThickness: 9 })).setOrigin(0.5));
       ov.add(this.add.text(W / 2, H / 2 + 155, 'The rarest and bestest friend in the Kingdom.', textStyle(19, '#ffffff', { fontStyle: 'bold' })).setOrigin(0.5));
       ov.add(button(this, W / 2, H / 2 + 260, 'ROYAL HIGH-FIVE!', () => { S.goldenDouglasFound = true; S.kingdomVisited = true; addAchievement('golden-douglas'); addSticker('golden-douglas'); addOutfit('royal'); addJournal('golden-douglas', '👑', 'Golden Douglas Appeared!', 'Hudson opened the royal door and found the rarest friend in the whole Kingdom.'); persist(); this.scene.start('WorldMapScene'); }, { width: 370, color: 0xd99e19, depth: 160, fontSize: 21 }));

@@ -18,6 +18,10 @@ export function withinRadius(ax, ay, bx, by, radius) {
   return dx * dx + dy * dy <= radius * radius;
 }
 
+export function isMilestone(count, every = 5) {
+  return Boolean(count) && count % every === 0;
+}
+
 export function nearestDestination(x, y, destinations) {
   return destinations.reduce((best, destination) => {
     const distance = Math.hypot(x - destination.x, y - destination.y);

@@ -66,10 +66,10 @@ export default class SpaceRescueScene extends AdventureBase {
     const type = object.getData('type');
     if (type === 'astronaut') {
       this.rescued += 1; this.combo += 1; AudioManager.playSfx('success');
-      this.floatingText(object.x, object.y, 'RESCUED!', '#ffd447'); this.celebrate(object.x, object.y, 0x8fdcff);
+      this.floatingText(object.x, object.y, 'RESCUED!', '#ffd447'); this.celebrate(object.x, object.y, 0x8fdcff); this.milestoneBurst(object.x, object.y, this.combo, 0x8fdcff);
     } else if (type === 'stardust') {
       this.stardust += 1; this.combo += 1; AudioManager.playSfx('bone_collect');
-      this.floatingText(object.x, object.y, 'STARDUST!', '#e3a8ff'); this.celebrate(object.x, object.y, 0xd28cff);
+      this.floatingText(object.x, object.y, 'STARDUST!', '#e3a8ff'); this.celebrate(object.x, object.y, 0xd28cff); this.milestoneBurst(object.x, object.y, this.combo, 0xd28cff);
     } else if (!this.invulnerable) {
       this.shields -= 1; this.combo = 0; this.invulnerable = true; AudioManager.playSfx('bump'); this.impact(0.008);
       this.ship.setAlpha(0.38); this.time.delayedCall(900, () => { this.invulnerable = false; if (this.ship.active) this.ship.setAlpha(1); });

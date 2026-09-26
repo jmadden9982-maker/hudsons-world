@@ -39,7 +39,13 @@ export default class DouglasDashScene extends AdventureBase {
     this.lastTime = this.time.now;
     this.spawnObstacleEvent = this.time.addEvent({ delay: S.settings.calm ? 1350 : 1000, loop: true, callback: () => this.spawn('obstacle') });
     this.spawnBoneEvent = this.time.addEvent({ delay: Math.max(520, 720 - (S.douglas.level - 1) * 45), loop: true, callback: () => this.spawn('bone') });
+    this.trailEvent = this.time.addEvent({ delay: 90, loop: true, callback: () => this.makeTrail() });
     this.makeTimer(S.settings.calm ? 42 : 36, () => this.finish());
+  }
+  makeTrail() {
+    if (!this.started || this.finished || this.jumping || S.settings.calm) return;
+    const trail = this.add.circle(this.player.x, this.player.y + 55, Phaser.Math.Between(4, 8), 0xfff0bd, 0.5).setDepth(9);
+    this.tweens.add({ targets: trail, y: trail.y + 40, scale: 0.1, alpha: 0, duration: 380, onComplete: () => trail.destroy() });
   }
   changeLane(direction) {
     if (!this.started || this.finished) return;
@@ -70,7 +76,7 @@ export default class DouglasDashScene extends AdventureBase {
       if (!object.getData('hit') && object.y > 875 && object.y < 1035 && object.getData('lane') === this.lane) {
         object.setData('hit', true);
         if (object.getData('type') === 'bone') {
-          this.bones += 1; this.streak += 1; this.bestStreak = Math.max(this.bestStreak, this.streak); AudioManager.playSfx('bone_collect'); this.floatingText(object.x, object.y, this.streak > 1 ? `BONE STREAK ×${this.streak}` : '+1 BONE', COLORS.yellow); this.celebrate(object.x, object.y, 0xffd447); object.destroy();
+          this.bones += 1; this.streak += 1; this.bestStreak = Math.max(this.bestStreak, this.streak); AudioManager.playSfx('bone_collect'); this.floatingText(object.x, object.y, this.streak > 1 ? `BONE STREAK ×${this.streak}` : '+1 BONE', COLORS.yellow); this.celebrate(object.x, object.y, 0xffd447); this.milestoneBurst(object.x, object.y, this.streak, 0xffd447); object.destroy();
         } else if (!this.jumping && !this.invulnerable) {
           this.hearts -= 1; this.streak = 0; this.invulnerable = true; AudioManager.playSfx('bump'); this.floatingText(object.x, object.y, 'BOUNCE!', '#ffdf7a'); this.impact(); object.destroy();
           this.playerActor.playState('hurt'); this.time.delayedCall(900, () => { this.invulnerable = false; });
@@ -83,7 +89,7 @@ export default class DouglasDashScene extends AdventureBase {
     this.hudText.setText(`🏃 ${Math.round(this.distance)}m   🦴 ${this.bones} ×${this.streak}   ${'❤️'.repeat(this.hearts)}${'🤍'.repeat(3 - this.hearts)}`);
   }
   finish(neededBreather = false) {
-    if (this.finished) return; this.finished = true; this.spawnObstacleEvent?.remove(); this.spawnBoneEvent?.remove(); this.timerEvent?.remove();
+    if (this.finished) return; this.finished = true; this.spawnObstacleEvent?.remove(); this.spawnBoneEvent?.remove(); this.trailEvent?.remove(); this.timerEvent?.remove();
     if (!neededBreather) this.playerActor.playState('celebrate');
     const score = Math.round(this.distance + this.bones * 35 + this.bestStreak * 20); const stars = score >= 1100 ? 3 : score >= 700 ? 2 : 1;
     const result = recordAdventure('forest', score, stars, { bones: this.bones, icon: '🐶', title: 'Douglas Dash Champion', journal: `Hudson helped Douglas race ${Math.round(this.distance)} metres and collect ${this.bones} bones.` });

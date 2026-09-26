@@ -3,6 +3,7 @@ import { S } from '../systems/state.js';
 import { button, COLORS, roundedPanel, textStyle, topBar } from '../ui/kit.js';
 import AudioManager from '../systems/AudioManager.js';
 import Narrator from '../systems/Narrator.js';
+import { isMilestone } from '../systems/gameplay.js';
 
 export default class AdventureBase extends Phaser.Scene {
   constructor(key) { super(key); this.finished = false; this.started = false; }
@@ -50,5 +51,16 @@ export default class AdventureBase extends Phaser.Scene {
 
   impact(intensity = 0.006) {
     if (!S.settings.calm) this.cameras.main.shake(120, intensity);
+  }
+
+  // Extra flourish every 5th streak/combo: a bigger burst, a camera flash and an
+  // "on fire" callout, on top of whatever per-pickup feedback the scene already shows.
+  milestoneBurst(x, y, count, color = 0xffd447) {
+    if (!isMilestone(count)) return;
+    this.floatingText(x, y - 60, '🔥 ON FIRE!', color);
+    if (!S.settings.calm) {
+      this.celebrate(x, y, color);
+      this.cameras.main.flash(160, 255, 212, 71, false);
+    }
   }
 }

@@ -55,7 +55,7 @@ export default class WinterVillageScene extends AdventureBase {
     } else {
       const points = type === 'crystal' ? 3 : 1; this.snowScore += points; this.caught += 1; this.combo += 1; this.bestCombo = Math.max(this.bestCombo, this.combo);
       AudioManager.playSfx(type === 'crystal' ? 'reward' : 'success'); this.floatingText(target.x, target.y, type === 'crystal' ? '+3 ICE CRYSTAL' : '+1 SNOW', '#ffffff');
-      this.celebrate(target.x, target.y, type === 'crystal' ? 0x8fe7ff : 0xdff6ff);
+      this.celebrate(target.x, target.y, type === 'crystal' ? 0x8fe7ff : 0xdff6ff); this.milestoneBurst(target.x, target.y, this.combo, 0x8fe7ff);
     }
     target.destroy(); this.updateStatus(); if (this.warmth <= 0) this.time.delayedCall(150, () => this.finish(true));
   }
