@@ -19,3 +19,16 @@ test('unlocked trophies and collection items are interactive, not just displayed
   assert.ok(/setInteractive/.test(trophy) && /showDetail/.test(trophy), 'Trophy Room should let unlocked trophies be opened');
   assert.ok(/setInteractive/.test(collections) && /showDetail/.test(collections), 'Collections should let unlocked items be opened');
 });
+
+test('the world map surfaces a real daily challenge zone, not just decoration', () => {
+  const text = source('WorldMapScene.js');
+  assert.ok(/todaysChallengeZone/.test(text), 'the map should read the actual daily challenge zone from state');
+  assert.ok(/DOUBLE STARS/.test(text), 'the map should tell players which zone doubles stars today');
+});
+
+test('family photo memories can be read aloud, not just tapped open', () => {
+  const text = source('FamilyPhotoWallScene.js');
+  assert.ok(/Narrator\.speak/.test(text), 'photo memories should offer a read-aloud detail like trophies and collections');
+  assert.ok(/detail:/.test(text), 'each memory should carry its own story detail, not just a title');
+  assert.ok(/PhotoCaptionScene/.test(text), 'the wall should link through to caption editing');
+});

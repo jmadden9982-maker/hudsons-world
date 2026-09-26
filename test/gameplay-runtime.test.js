@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { chaosBatchSize, eggMatches, isMilestone, isRainbowRound, nearestDestination, nearbyTreasureCount, pickBonusIndex, pickSpaceSpawnType, smoothDelta, withinRadius } from '../src/systems/gameplay.js';
+import { chaosBatchSize, dailyChallengeZone, daySeed, eggMatches, isMilestone, isRainbowRound, nearestDestination, nearbyTreasureCount, pickBonusIndex, pickSpaceSpawnType, smoothDelta, withinRadius } from '../src/systems/gameplay.js';
 
 test('lag spikes are capped so moving objects cannot jump across the playfield', () => {
   assert.equal(smoothDelta(16.67), 16.67);
@@ -75,4 +75,18 @@ test('streak milestones fire only on every 5th, never on zero', () => {
   assert.equal(isMilestone(5), true);
   assert.equal(isMilestone(10), true);
   assert.equal(isMilestone(6, 3), true);
+});
+
+test('the day seed is stable for a given date and changes across calendar days', () => {
+  assert.equal(daySeed(new Date(2026, 2, 5)), 202635);
+  assert.equal(daySeed(new Date(2026, 2, 5)), daySeed(new Date(2026, 2, 5)));
+  assert.notEqual(daySeed(new Date(2026, 2, 5)), daySeed(new Date(2026, 2, 6)));
+});
+
+test('the daily challenge zone rotates deterministically through every zone', () => {
+  const zones = ['forest', 'pirate', 'dino', 'space', 'pumpkin'];
+  assert.equal(dailyChallengeZone(0, zones), 'forest');
+  assert.equal(dailyChallengeZone(1, zones), 'pirate');
+  assert.equal(dailyChallengeZone(5, zones), 'forest');
+  assert.equal(dailyChallengeZone(202635, zones), zones[202635 % zones.length]);
 });

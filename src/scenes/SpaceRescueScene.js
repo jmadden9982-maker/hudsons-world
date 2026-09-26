@@ -125,7 +125,7 @@ export default class SpaceRescueScene extends AdventureBase {
     const score = this.rescued * 180 + this.stardust * 55 + this.bestCombo * 30 + this.shields * 80;
     const stars = score >= 2100 ? 3 : score >= 1150 ? 2 : 1;
     const result = recordAdventure('space', score, stars, { icon: '🚀', title: 'Space Station Rescue', journal: `Commander Hudson free-flew through the stars and brought ${this.rescued} explorers safely home.` });
-    const rewardText = result.critter ? `New critter: ${result.critter.icon} ${result.critter.name}!` : result.firstBadge ? 'New Space Badge + Astronaut Outfit!' : `Best rescue combo: ${this.bestCombo}`;
+    const rewardText = (result.critter ? `New critter: ${result.critter.icon} ${result.critter.name}!` : result.firstBadge ? 'New Space Badge + Astronaut Outfit!' : `Best rescue combo: ${this.bestCombo}`) + (result.dailyChallenge ? ' 🌟 Double Star Day bonus!' : '');
     showAdventureResult(this, { title: shieldsDown ? 'ROCKET SAFELY LANDED!' : 'DEEP-SPACE MISSION COMPLETE!', message: `${this.rescued} explorers rescued and ${this.stardust} stardust collected.`, stars, score, scoreLabel: 'Mission score', rewardText, onReplay: () => this.scene.restart() });
   }
 }

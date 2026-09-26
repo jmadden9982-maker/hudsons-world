@@ -29,6 +29,22 @@ test('replays only award newly earned zone stars', () => {
   assert.equal(state.S.stars, afterOne + 2);
 });
 
+test('the daily challenge zone doubles newly earned stars, every other zone does not', () => {
+  const challenge = state.todaysChallengeZone();
+  assert.ok(state.ZONE_IDS.includes(challenge));
+  const other = state.ZONE_IDS.find((id) => id !== challenge);
+
+  state.resetProgress();
+  const challengeResult = state.recordAdventure(challenge, 900, 3);
+  assert.equal(challengeResult.dailyChallenge, true);
+  assert.equal(state.S.stars, challengeResult.newStars * 2);
+
+  state.resetProgress();
+  const otherResult = state.recordAdventure(other, 900, 3);
+  assert.equal(otherResult.dailyChallenge, false);
+  assert.equal(state.S.stars, otherResult.newStars);
+});
+
 test('Douglas care is kind, capped and advances the friendship quest', () => {
   state.resetProgress();
   for (let i = 0; i < 10; i += 1) state.careForDouglas('play');

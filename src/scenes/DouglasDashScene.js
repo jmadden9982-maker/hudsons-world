@@ -103,7 +103,7 @@ export default class DouglasDashScene extends AdventureBase {
     if (!neededBreather) this.playerActor.playState('celebrate');
     const score = Math.round(this.distance + this.bones * 35 + this.bestStreak * 20); const stars = score >= 1100 ? 3 : score >= 700 ? 2 : 1;
     const result = recordAdventure('forest', score, stars, { bones: this.bones, icon: '🐶', title: 'Douglas Dash Champion', journal: `Hudson helped Douglas race ${Math.round(this.distance)} metres and collect ${this.bones} bones.` });
-    const rewardText = result.critter ? `New critter: ${result.critter.icon} ${result.critter.name}!` : result.firstBadge ? 'New Forest Badge + Ranger Outfit!' : result.newStars ? `You improved by ${result.newStars} star!` : 'Great practice run!';
+    const rewardText = (result.critter ? `New critter: ${result.critter.icon} ${result.critter.name}!` : result.firstBadge ? 'New Forest Badge + Ranger Outfit!' : result.newStars ? `You improved by ${result.newStars} star!` : 'Great practice run!') + (result.dailyChallenge ? ' 🌟 Double Star Day bonus!' : '');
     showAdventureResult(this, { title: neededBreather ? 'Douglas Took a Breather!' : 'TEMPLE TRAIL COMPLETE!', message: neededBreather ? 'Even champions stop for a drink. Every run still counts!' : 'Fast paws and brilliant steering!', stars, score, rewardText, onReplay: () => this.scene.restart() });
   }
 }

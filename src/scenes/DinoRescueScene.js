@@ -63,7 +63,7 @@ export default class DinoRescueScene extends AdventureBase {
   finish() {
     if (this.finished) return; this.finished = true; const stars = this.mistakes <= 2 ? 3 : this.mistakes <= 5 ? 2 : 1; const score = Math.max(500, this.correct * 140 - this.mistakes * 30 + this.rainbowCaught * 60);
     const result = recordAdventure('dino', score, stars, { icon: '🦖', title: 'Dino Valley Rescue', journal: `Dino Doctor Hudson guided ${this.correct} eggs to the right nests.` });
-    const rewardText = result.critter ? `New critter: ${result.critter.icon} ${result.critter.name}!` : result.firstBadge ? 'New Dino Badge + Dino Outfit!' : 'The nursery is safe and sound.';
+    const rewardText = (result.critter ? `New critter: ${result.critter.icon} ${result.critter.name}!` : result.firstBadge ? 'New Dino Badge + Dino Outfit!' : 'The nursery is safe and sound.') + (result.dailyChallenge ? ' 🌟 Double Star Day bonus!' : '');
     const rainbowLine = this.rainbowCaught ? ` Spotted ${this.rainbowCaught} rainbow ${this.rainbowCaught === 1 ? 'egg' : 'eggs'}!` : '';
     showAdventureResult(this, { title: 'BABY DINOS RESCUED!', message: `All ${this.correct} eggs are snug in their nests after ${this.mistakes} ${this.mistakes === 1 ? 'retry' : 'retries'}.${rainbowLine}`, stars, score, scoreLabel: 'Rescue score', rewardText, onReplay: () => this.scene.restart() });
   }

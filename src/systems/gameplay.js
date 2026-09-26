@@ -63,3 +63,15 @@ export function pickBonusIndex(excludeIndexes, gridSize, roll) {
   for (let i = 0; i < gridSize; i += 1) if (!excludeIndexes.has(i)) available.push(i);
   return available[Math.min(available.length - 1, Math.floor(roll * available.length))];
 }
+
+// A stable per-calendar-day number, used to pick the same "today" outcome
+// everywhere it's needed without the two call sites drifting apart.
+export function daySeed(date = new Date()) {
+  return Number(`${date.getFullYear()}${date.getMonth() + 1}${date.getDate()}`);
+}
+
+// Rotates a daily double-stars challenge through the adventure zones so every
+// zone gets its turn, deterministically from the day's seed alone.
+export function dailyChallengeZone(seed, zoneIds) {
+  return zoneIds[seed % zoneIds.length];
+}

@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { S, campaignBadges, kingdomUnlocked } from '../systems/state.js';
+import { S, campaignBadges, kingdomUnlocked, todaysChallengeZone } from '../systems/state.js';
 import { ambientMotes, button, COLORS, hud, premiumBackdrop, roundedPanel, starRow, textStyle, toast, topBar } from '../ui/kit.js';
 import AudioManager from '../systems/AudioManager.js';
 import { decorateLivingWorld, maybeShowSurprise, worldLabel } from '../systems/WorldSystem.js';
@@ -21,13 +21,20 @@ export default class WorldMapScene extends Phaser.Scene {
     const path = this.add.graphics().setDepth(-5); path.lineStyle(14, 0xffe8a6, 0.9);
     path.beginPath(); path.moveTo(205, 285); path.lineTo(515, 285); path.lineTo(205, 515); path.lineTo(515, 515); path.lineTo(205, 745); path.lineTo(515, 745); path.strokePath();
 
+    const challengeZone = todaysChallengeZone();
     zones.forEach((zone) => {
-      roundedPanel(this, zone.x, zone.y, 270, 190, 0xffffff, 0.97, zone.color);
+      const isChallenge = zone.id === challengeZone;
+      roundedPanel(this, zone.x, zone.y, 270, 190, 0xffffff, 0.97, isChallenge ? 0xffd447 : zone.color);
       this.add.circle(zone.x, zone.y - 45, 47, zone.color, 0.16);
       this.add.text(zone.x, zone.y - 48, zone.icon, textStyle(51)).setOrigin(0.5);
       this.add.text(zone.x, zone.y + 16, zone.label, textStyle(17, COLORS.ink, { fontStyle: 'bold' })).setOrigin(0.5);
-      this.add.text(zone.x, zone.y + 43, zone.sub, textStyle(14, '#766b87')).setOrigin(0.5);
+      const best = S.best[zone.id] || 0;
+      this.add.text(zone.x, zone.y + 43, best ? `Best score: ${best}` : zone.sub, textStyle(14, '#766b87')).setOrigin(0.5);
       starRow(this, zone.x, zone.y + 73, S.zoneStars[zone.id] || 0, 21);
+      if (isChallenge) {
+        const ribbon = this.add.text(zone.x, zone.y - 102, '⭐ TODAY’S CHALLENGE — DOUBLE STARS', textStyle(11, '#5b3a00', { fontStyle: 'bold', backgroundColor: '#ffd447', padding: { x: 8, y: 4 } })).setOrigin(0.5);
+        this.tweens.add({ targets: ribbon, y: ribbon.y - 6, duration: 650, yoyo: true, repeat: -1, ease: 'Sine.inOut' });
+      }
       const hit = this.add.zone(zone.x, zone.y, 270, 190).setInteractive({ useHandCursor: true });
       hit.on('pointerdown', () => { AudioManager.playSfx('button_confirm'); this.scene.start(zone.scene); });
     });

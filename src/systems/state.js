@@ -1,5 +1,6 @@
 import SaveSystem from './SaveSystem.js';
 import { BUILDINGS, CRITTERS, DOUGLAS_SKINS } from '../data/collections.js';
+import { dailyChallengeZone, daySeed } from './gameplay.js';
 
 export const ZONE_IDS = ['forest', 'pirate', 'dino', 'space', 'pumpkin'];
 
@@ -186,17 +187,21 @@ export function claimQuest(id) {
   return true;
 }
 
+export function todaysChallengeZone() { return dailyChallengeZone(daySeed(), ZONE_IDS); }
+
 export function recordAdventure(zoneId, score, stars, extras = {}) {
-  if (!ZONE_IDS.includes(zoneId)) return { newBest: false, newStars: 0, levelUps: 0, firstBadge: false };
+  if (!ZONE_IDS.includes(zoneId)) return { newBest: false, newStars: 0, levelUps: 0, firstBadge: false, dailyChallenge: false };
   const previousStars = S.zoneStars[zoneId] || 0;
   const previousBest = S.best[zoneId] || 0;
   const earned = Math.max(1, Math.min(3, stars));
   const newStars = Math.max(0, earned - previousStars);
   const firstBadge = previousStars === 0;
+  const dailyChallenge = newStars > 0 && zoneId === todaysChallengeZone();
+  const bonusStars = dailyChallenge ? newStars : 0;
 
   S.zoneStars[zoneId] = Math.max(previousStars, earned);
   S.best[zoneId] = Math.max(previousBest, Math.round(score));
-  S.stars += newStars;
+  S.stars += newStars + bonusStars;
   S.bones += extras.bones || 0;
   S.plays += 1;
   S.lifetime += Math.max(0, Math.round(score));
@@ -223,7 +228,7 @@ export function recordAdventure(zoneId, score, stars, extras = {}) {
   }
   if (totalZoneStars() === 15) addAchievement('perfect-adventurer');
   persist();
-  return { newBest: score > previousBest, newStars, levelUps, firstBadge, critter };
+  return { newBest: score > previousBest, newStars, levelUps, firstBadge, critter, dailyChallenge };
 }
 
 export function careForDouglas(action) {

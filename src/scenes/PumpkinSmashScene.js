@@ -48,7 +48,7 @@ export default class PumpkinSmashScene extends AdventureBase {
     if (this.finished) return; this.finished = true; this.spawnEvent?.remove(); this.timerEvent?.remove(); this.activeTargets.forEach((t) => t.active && t.destroy());
     const stars = this.points >= 27 ? 3 : this.points >= 16 ? 2 : 1; const score = this.points * 75 + this.bestCombo * 25;
     const result = recordAdventure('pumpkin', score, stars, { icon: '🎃', title: 'Pumpkin Patch Champion', journal: `Hudson smashed ${this.smashed} pumpkins and kept Baby Bell safe.` });
-    const rewardText = result.critter ? `New critter: ${result.critter.icon} ${result.critter.name}!` : result.firstBadge ? 'New Pumpkin Badge + Pumpkin Outfit!' : 'A smashing result!';
+    const rewardText = (result.critter ? `New critter: ${result.critter.icon} ${result.critter.name}!` : result.firstBadge ? 'New Pumpkin Badge + Pumpkin Outfit!' : 'A smashing result!') + (result.dailyChallenge ? ' 🌟 Double Star Day bonus!' : '');
     showAdventureResult(this, { title: 'HARVEST COMPLETE!', message: `${this.points} harvest points with a best combo of ${this.bestCombo}.`, stars, score, scoreLabel: 'Harvest score', rewardText, onReplay: () => this.scene.restart() });
   }
 }

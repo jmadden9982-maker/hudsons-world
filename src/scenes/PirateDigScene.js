@@ -61,7 +61,7 @@ export default class PirateDigScene extends AdventureBase {
   finish() {
     if (this.finished) return; this.finished = true; const stars = this.found >= 5 ? 3 : this.found >= 3 ? 2 : 1; const score = this.found * 200 + this.turns * 25 + (this.goldFound ? 150 : 0);
     const result = recordAdventure('pirate', score, stars, { icon: '🏴‍☠️', title: 'Pirate Island Treasure', journal: `Captain Hudson uncovered ${this.found} hidden treasures with Douglas.` });
-    const rewardText = result.critter ? `New critter: ${result.critter.icon} ${result.critter.name}!` : result.firstBadge ? 'New Pirate Badge + Captain Outfit!' : 'The treasure map has been saved.';
+    const rewardText = (result.critter ? `New critter: ${result.critter.icon} ${result.critter.name}!` : result.firstBadge ? 'New Pirate Badge + Captain Outfit!' : 'The treasure map has been saved.') + (result.dailyChallenge ? ' 🌟 Double Star Day bonus!' : '');
     const goldLine = this.goldFound ? ' Douglas also sniffed out the Lucky Chest!' : '';
     showAdventureResult(this, { title: 'TREASURE HUNT COMPLETE!', message: `${this.found >= 5 ? 'Captain Hudson found every chest!' : 'A good pirate always maps the next dig.'}${goldLine}`, stars, score, scoreLabel: 'Treasure score', rewardText, onReplay: () => this.scene.restart() });
   }

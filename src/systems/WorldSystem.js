@@ -1,12 +1,9 @@
 import Phaser from 'phaser';
 import { S, addJournal, addSticker, persist, unlockNextCritter } from './state.js';
 import { textStyle, toast } from '../ui/kit.js';
+import { daySeed } from './gameplay.js';
 
 let surpriseShownThisSession = false;
-
-function daySeed() {
-  const d = new Date(); return Number(`${d.getFullYear()}${d.getMonth() + 1}${d.getDate()}`);
-}
 
 export function worldMood() {
   const hour = new Date().getHours();
