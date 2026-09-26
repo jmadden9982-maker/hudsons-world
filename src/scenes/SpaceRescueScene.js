@@ -62,14 +62,23 @@ export default class SpaceRescueScene extends AdventureBase {
     this.tweens.add({ targets: trail, y: trail.y + 45, scale: 0.1, alpha: 0, duration: 430, onComplete: () => trail.destroy() });
   }
 
+  spacePuff(x, y, color) {
+    if (S.settings.calm) return;
+    for (let i = 0; i < 8; i += 1) {
+      const angle = Phaser.Math.FloatBetween(0, Math.PI * 2); const distance = Phaser.Math.Between(24, 58);
+      const spark = this.add.circle(x, y, Phaser.Math.Between(3, 6), color, 0.85).setDepth(9);
+      this.tweens.add({ targets: spark, x: x + Math.cos(angle) * distance, y: y + Math.sin(angle) * distance, alpha: 0, scale: 0.2, duration: 360, ease: 'Quad.easeOut', onComplete: () => spark.destroy() });
+    }
+  }
+
   collect(object) {
     const type = object.getData('type');
     if (type === 'astronaut') {
       this.rescued += 1; this.combo += 1; AudioManager.playSfx('success');
-      this.floatingText(object.x, object.y, 'RESCUED!', '#ffd447'); this.celebrate(object.x, object.y, 0x8fdcff); this.milestoneBurst(object.x, object.y, this.combo, 0x8fdcff);
+      this.floatingText(object.x, object.y, 'RESCUED!', '#ffd447'); this.celebrate(object.x, object.y, 0x8fdcff); this.spacePuff(object.x, object.y, 0x8fdcff); this.milestoneBurst(object.x, object.y, this.combo, 0x8fdcff);
     } else if (type === 'stardust') {
       this.stardust += 1; this.combo += 1; AudioManager.playSfx('bone_collect');
-      this.floatingText(object.x, object.y, 'STARDUST!', '#e3a8ff'); this.celebrate(object.x, object.y, 0xd28cff); this.milestoneBurst(object.x, object.y, this.combo, 0xd28cff);
+      this.floatingText(object.x, object.y, 'STARDUST!', '#e3a8ff'); this.celebrate(object.x, object.y, 0xd28cff); this.spacePuff(object.x, object.y, 0xd28cff); this.milestoneBurst(object.x, object.y, this.combo, 0xd28cff);
     } else if (!this.invulnerable) {
       this.shields -= 1; this.combo = 0; this.invulnerable = true; AudioManager.playSfx('bump'); this.impact(0.008);
       this.ship.setAlpha(0.38); this.time.delayedCall(900, () => { this.invulnerable = false; if (this.ship.active) this.ship.setAlpha(1); });

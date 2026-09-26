@@ -26,7 +26,7 @@ export default class FinleyChaosScene extends AdventureBase {
   preload() { queuePremiumBackdrop(this, 'premium-finley', 'assets/premium/finley-playroom.png'); }
 
   create() {
-    this.round = 0; this.tidied = 0; this.mistakes = 0; this.usedItems = [];
+    this.round = 0; this.tidied = 0; this.mistakes = 0; this.streak = 0; this.usedItems = [];
     premiumBackdrop(this, 'premium-finley', { shade: 0.1, drift: false, transient: true });
     this.add.text(360, 148, '👶  FINLEY CHAOS ENGINE  🌪️', textStyle(24, '#ffffff', { fontStyle: 'bold', stroke: '#56381f', strokeThickness: 7 })).setOrigin(0.5);
     roundedPanel(this, 360, 385, 440, 300, 0xfffbef, 0.9, 0xffd447);
@@ -63,17 +63,25 @@ export default class FinleyChaosScene extends AdventureBase {
     item.on('dragend', () => this.dropItem(item));
   }
 
+  tidyBurst(x, y, color) {
+    if (S.settings.calm) return;
+    for (let i = 0; i < 8; i += 1) {
+      const angle = Phaser.Math.FloatBetween(0, Math.PI * 2); const distance = Phaser.Math.Between(28, 66);
+      const star = this.add.text(x, y, '✨', textStyle(Phaser.Math.Between(16, 24))).setOrigin(0.5).setDepth(9);
+      this.tweens.add({ targets: star, x: x + Math.cos(angle) * distance, y: y + Math.sin(angle) * distance, alpha: 0, scale: 0.4, duration: 420, ease: 'Quad.easeOut', onComplete: () => star.destroy() });
+    }
+  }
   dropItem(item) {
     if (!this.started || this.finished || !item.active) return;
     this.homeZones.forEach((home) => home.glow.setAlpha(1));
     const closest = nearestDestination(item.x, item.y, this.homeZones);
     if (closest.distance < 120 && closest.destination.id === item.getData('home')) {
       const home = closest.destination;
-      item.disableInteractive(); this.tidied += 1; this.round += 1; AudioManager.playSfx('success');
-      this.floatingText(home.x, home.y - 80, 'PERFECT TIDY!', '#ffd447'); this.celebrate(home.x, home.y, home.color);
+      item.disableInteractive(); this.tidied += 1; this.round += 1; this.streak += 1; AudioManager.playSfx('success');
+      this.floatingText(home.x, home.y - 80, 'PERFECT TIDY!', '#ffd447'); this.celebrate(home.x, home.y, home.color); this.tidyBurst(home.x, home.y, home.color); this.milestoneBurst(home.x, home.y, this.streak, home.color);
       this.tweens.add({ targets: item, x: home.x, y: home.y, scale: 0.25, angle: 360, alpha: 0.3, duration: 420, ease: 'Back.easeIn', onComplete: () => { item.destroy(); this.time.delayedCall(220, () => this.nextItem()); } });
     } else {
-      this.mistakes += 1; AudioManager.playSfx('button_click'); this.floatingText(item.x, item.y, 'WOBBLY DROP — TRY AGAIN!', '#ffffff');
+      this.mistakes += 1; this.streak = 0; this.impact(0.004); AudioManager.playSfx('button_click'); this.floatingText(item.x, item.y, 'WOBBLY DROP — TRY AGAIN!', '#ffffff');
       this.tweens.add({ targets: item, x: item.getData('startX'), y: item.getData('startY'), scale: 1, angle: 0, duration: 420, ease: 'Back.easeOut' });
       this.status.setText(`ROOM ${this.round + 1}/8   ✅ ${this.tidied}   ↩ ${this.mistakes}`);
     }
